@@ -113,7 +113,68 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // ============ CONTADOR DE ESTATÍSTICAS ============
+  // ============ CONTADOR HERO STATS ============
+  function animateHeroStats() {
+    const heroStats = document.querySelectorAll('.hero-stat-number[data-target]');
+    heroStats.forEach(el => {
+      const target = parseInt(el.dataset.target);
+      const prefix = el.dataset.prefix || '';
+      const suffix = el.dataset.suffix || '';
+      let start = 0;
+
+      // ⬇️ VELOCIDADE DOS MILHARES (5.000)
+      const durationMilhares = 2500;
+      const intervalMilhares = 16;
+
+      // ⬇️ VELOCIDADE DOS ANOS (10)
+      const durationAnos = 3500;
+      const intervalAnos = 200;
+
+      // ⬇️ VELOCIDADE DA PORCENTAGEM (100%)
+      const durationPorcentagem = 2500;
+      const intervalPorcentagem = 60;
+
+      let duration, interval;
+      if (suffix.includes('anos')) {
+        duration = durationAnos;
+        interval = intervalAnos;
+      } else if (suffix.includes('%')) {
+        duration = durationPorcentagem;
+        interval = intervalPorcentagem;
+      } else {
+        duration = durationMilhares;
+        interval = intervalMilhares;
+      }
+
+      const step = Math.max(1, Math.ceil(target / (duration / interval)));
+      const timer = setInterval(() => {
+        start += step;
+        if (start >= target) {
+          start = target;
+          clearInterval(timer);
+        }
+        const formatted = target >= 1000
+          ? start.toLocaleString('pt-BR')
+          : start;
+        el.textContent = prefix + formatted + suffix;
+      }, interval);
+    });
+  }
+
+  // Dispara quando o hero fica visível
+  const heroStatsObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        animateHeroStats();
+        heroStatsObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  const heroStats = document.querySelector('.hero-stats');
+  if (heroStats) heroStatsObserver.observe(heroStats);
+
+
   function animateCounter(el, target, suffix) {
     let start = 0;
     const duration = 1800;
