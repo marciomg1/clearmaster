@@ -472,3 +472,256 @@ select.form-control option { background:var(--azul-medio); color:var(--texto-bra
   .footer-container { grid-template-columns:1fr; }
   .footer-bottom { flex-direction:column; text-align:center; }
 }
+
+/* ============ CALCULADORA DE ORÇAMENTO ============ */
+.calc-wrapper {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.calc-step {
+  display: none;
+  animation: fadeInUp 0.4s ease;
+}
+.calc-step.active { display: block; }
+
+.calc-step-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.calc-step-number {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, var(--dourado), var(--dourado-claro));
+  color: var(--azul-escuro);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--fonte-titulo);
+  font-weight: 800; font-size: 1rem;
+  flex-shrink: 0;
+}
+.calc-step-header h3 { margin: 0; font-size: 1.3rem; }
+
+.calc-opcoes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.calc-opcao {
+  background: var(--azul-card);
+  border: 2px solid var(--azul-borda);
+  border-radius: var(--borda-radius);
+  padding: 24px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transicao);
+}
+.calc-opcao:hover {
+  border-color: var(--dourado);
+  transform: translateY(-4px);
+  box-shadow: var(--sombra-card);
+}
+.calc-opcao.selected {
+  border-color: var(--dourado);
+  background: var(--dourado-glow);
+}
+.calc-opcao i {
+  font-size: 2rem;
+  color: var(--dourado);
+  display: block;
+  margin-bottom: 12px;
+}
+.calc-opcao span {
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--texto-branco);
+}
+
+.calc-cidade-wrap { margin-bottom: 20px; }
+.calc-cidade-info {
+  font-size: 0.85rem;
+  margin-top: 8px;
+  min-height: 20px;
+}
+.calc-cidade-info.gratis { color: #4ade80; }
+.calc-cidade-info.taxa { color: var(--dourado); }
+
+.calc-btn-resultado {
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 16px;
+  opacity: 0.5;
+  pointer-events: none;
+  transition: var(--transicao);
+}
+.calc-btn-resultado:not([disabled]) {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.calc-voltar {
+  background: none;
+  border: none;
+  color: var(--texto-muted);
+  font-family: var(--fonte-titulo);
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  transition: var(--transicao);
+}
+.calc-voltar:hover { color: var(--texto-claro); }
+
+/* Resultado */
+.calc-resultado-wrap {
+  background: var(--azul-card);
+  border: 1px solid var(--azul-borda);
+  border-radius: 20px;
+  padding: 36px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.calc-resultado-servico {
+  font-size: 0.82rem;
+  color: var(--texto-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.calc-resultado-preco {
+  font-family: var(--fonte-titulo);
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: var(--dourado);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.calc-resultado-detalhe {
+  font-size: 0.88rem;
+  color: var(--texto-claro);
+  margin-bottom: 4px;
+}
+
+.calc-resultado-taxa {
+  display: inline-block;
+  background: rgba(201,168,76,0.1);
+  border: 1px solid rgba(201,168,76,0.2);
+  color: var(--dourado);
+  font-size: 0.82rem;
+  padding: 6px 14px;
+  border-radius: 100px;
+  margin: 12px 0 24px;
+}
+
+.calc-resultado-avaliacao {
+  background: rgba(37,211,102,0.07);
+  border: 1px solid rgba(37,211,102,0.2);
+  border-radius: var(--borda-radius);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+.calc-resultado-avaliacao i {
+  font-size: 2rem;
+  color: var(--verde-wp);
+  margin-bottom: 10px;
+  display: block;
+}
+.calc-resultado-avaliacao p {
+  color: var(--texto-claro);
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+.calc-resultado-wrap .btn {
+  width: 100%;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.calc-opcao small {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--texto-muted);
+  margin-top: 4px;
+}
+.calc-opcao:hover small, .calc-opcao.selected small { color: var(--dourado); }
+
+.calc-nota {
+  font-size: 0.82rem;
+  color: var(--texto-muted);
+  margin: 16px 0 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.calc-nota i { color: var(--dourado); margin-top: 2px; flex-shrink: 0; }
+
+/* ============ ANIMAÇÃO VIBRAÇÃO BOTÃO FLUTUANTE ============ */
+@keyframes vibrar {
+  0%, 100% { transform: rotate(0deg); }
+  10% { transform: rotate(-4deg); }
+  20% { transform: rotate(4deg); }
+  30% { transform: rotate(-4deg); }
+  40% { transform: rotate(4deg); }
+  50% { transform: rotate(0deg); }
+}
+
+.orcamento-float {
+  animation: vibrar 1s ease 3s, vibrar 1s ease 8s, vibrar 1s ease 16s, vibrar 1s ease 30s;
+}
+
+/* ============ CALCULADORA DESTAQUE (seção contato) ============ */
+.calc-destaque-wrapper {
+  max-width: 780px;
+  margin: 0 auto;
+  background: linear-gradient(135deg, rgba(20,29,46,0.95), rgba(10,15,30,0.98));
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 24px;
+  padding: 48px;
+  box-shadow: 0 0 60px rgba(201,168,76,0.07), 0 24px 64px rgba(0,0,0,0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.calc-destaque-wrapper::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 20%; right: 20%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--dourado), transparent);
+}
+
+.calc-destaque-wrapper .calc-step-header h3 {
+  font-size: 1.5rem;
+}
+
+.calc-destaque-wrapper .calc-step-number {
+  width: 48px; height: 48px;
+  font-size: 1.1rem;
+}
+
+.calc-opcoes-3 {
+  grid-template-columns: repeat(3, 1fr) !important;
+}
+
+.calc-destaque-wrapper .calc-opcao {
+  padding: 28px 16px;
+}
+
+.calc-destaque-wrapper .calc-opcao i {
+  font-size: 2.4rem;
+}
+
+@media (max-width: 600px) {
+  .calc-destaque-wrapper { padding: 28px 20px; }
+  .calc-opcoes-3 { grid-template-columns: 1fr !important; }
+}

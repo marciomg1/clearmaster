@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const intervalMilhares = 16;
 
       // ⬇️ VELOCIDADE DOS ANOS (10)
-      const durationAnos = 3500;
+      const durationAnos = 3000;
       const intervalAnos = 200;
 
       // ⬇️ VELOCIDADE DA PORCENTAGEM (100%)
@@ -287,9 +287,277 @@ document.addEventListener('DOMContentLoaded', function () {
       const target = document.querySelector(this.getAttribute('href'));
       if (target) {
         const offset = document.querySelector('.header').offsetHeight;
-        window.scrollTo({ top: target.offsetTop - offset, behavior: 'smooth' });
+        const extra = this.getAttribute('href') === '#orcamento' ? 40 : 0;
+        window.scrollTo({ top: target.offsetTop - offset - extra, behavior: 'smooth' });
       }
     });
   });
 
 });
+
+  // ============ CALCULADORA DE ORÇAMENTO ============
+  const precos = {
+    sofa: [
+      { label: 'Sofá 2 e 3 lugares', preco: 180 },
+      { label: 'Sofá 2 e 3 lugares com almofada solta', preco: 210 },
+      { label: 'Sofá retrátil até 2,30m (sem almofadas)', preco: 170 },
+      { label: 'Sofá retrátil até 2,80m (sem almofadas)', preco: 190 },
+    ],
+    colchao: [
+      { label: 'Colchão Solteiro', preco: 110 },
+      { label: 'Colchão Casal', preco: 180 },
+      { label: 'Colchão Queen', preco: 195 },
+      { label: 'Colchão King', preco: 210 },
+    ],
+    impermeabilizacao: []
+  };
+
+  let calcServico = null;
+  let calcModelo = null;
+  let calcCidade = '';
+  let calcTaxa = 0;
+
+  window.escolherCidade = function(cidade, taxa) {
+    calcCidade = cidade;
+    calcTaxa = taxa;
+    document.querySelectorAll('#passo3-cidades .calc-opcao').forEach(o => o.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+    setTimeout(() => mostrarResultado(), 300);
+  };
+
+  window.escolherServico = function(servico) {
+    calcServico = servico;
+    const passo2 = document.getElementById('passo2-opcoes');
+    const titulo = document.getElementById('passo2-titulo');
+
+    if (servico === 'impermeabilizacao') {
+      irParaPasso('passo-resultado');
+      mostrarAvaliacaoImpermeabilizacao();
+      return;
+    }
+
+    titulo.textContent = servico === 'sofa' ? 'Qual o modelo do sofá?' : 'Qual o tamanho do colchão?';
+    passo2.innerHTML = '';
+    precos[servico].forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'calc-opcao';
+      div.innerHTML = `<i class="fas fa-${servico === 'sofa' ? 'couch' : 'bed'}"></i><span>${item.label}</span>`;
+      div.onclick = () => escolherModelo(i, div);
+      passo2.appendChild(div);
+    });
+
+    // Outros modelos
+    const outro = document.createElement('div');
+    outro.className = 'calc-opcao';
+    outro.innerHTML = `<i class="fas fa-question-circle"></i><span>Outros modelos</span>`;
+    outro.onclick = () => escolherModelo(-1, outro);
+    passo2.appendChild(outro);
+
+    irParaPasso('passo-2');
+  };
+
+  window.escolherModelo = function(index, el) {
+    document.querySelectorAll('#passo2-opcoes .calc-opcao').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    calcModelo = index;
+    irParaPasso('passo-3');
+  };
+
+  window.mostrarResultado = function() {
+    const content = document.getElementById('calc-resultado-content');
+
+    // Cidade: consultar WhatsApp
+    if (calcTaxa === -1) {
+      const nomeServico0 = calcServico === 'sofa' ? 'Sofá' : 'Colchão';
+      const nomeModelo0 = calcModelo === -1 ? 'Outros modelos (foto a enviar)' : precos[calcServico][calcModelo].label;
+      const msgWpp0 = `Olá ClearMaster! 👋\n\nGostaria de um orçamento para:\n*Serviço:* Higienização de ${nomeServico0}\n*Modelo:* ${nomeModelo0}\n*Cidade:* ${calcCidade}\n\nPoderia me informar o valor do deslocamento?`;
+      content.innerHTML = `
+        <div class="calc-resultado-avaliacao">
+          <i class="fas fa-map-marker-alt"></i>
+          <p><strong style="color:var(--texto-branco)">Cidade não listada</strong><br><br>
+          Para cidades fora da nossa área padrão, o valor do deslocamento é calculado individualmente. Fale conosco pelo WhatsApp!</p>
+        </div>
+        <a href="https://wa.me/5535992469549?text=${encodeURIComponent(msgWpp0)}" target="_blank" class="btn btn-whatsapp">
+          <i class="fab fa-whatsapp"></i> Consultar pelo WhatsApp
+        </a>
+      `;
+      irParaPasso('passo-resultado');
+      return;
+    }
+
+    // Outros modelos
+    if (calcModelo === -1) {
+      const nomeServico1 = calcServico === 'sofa' ? 'Sofá' : 'Colchão';
+      const msgWpp1 = `Olá ClearMaster! 👋\n\nGostaria de um orçamento para higienização de ${nomeServico1}.\n*Cidade:* ${calcCidade}\n\nMeu modelo não estava na lista, vou enviar uma foto para avaliação!`;
+      content.innerHTML = `
+        <div class="calc-resultado-avaliacao">
+          <i class="fas fa-camera"></i>
+          <p><strong style="color:var(--texto-branco)">Modelo não listado</strong><br><br>
+          Para modelos fora do padrão, o orçamento é feito por foto. Envie uma foto do seu ${nomeServico1.toLowerCase()} pelo WhatsApp e passamos o valor rapidinho!</p>
+        </div>
+        <a href="https://wa.me/5535992469549?text=${encodeURIComponent(msgWpp1)}" target="_blank" class="btn btn-whatsapp">
+          <i class="fab fa-whatsapp"></i> Enviar foto pelo WhatsApp
+        </a>
+      `;
+      irParaPasso('passo-resultado');
+      return;
+    }
+
+    const item = precos[calcServico][calcModelo];
+    const preco = item.preco;
+    const totalEstimado = calcTaxa > 0 ? preco + calcTaxa : preco;
+    const nomeServico = calcServico === 'sofa' ? 'Sofá' : 'Colchão';
+
+    const msgWpp =
+      `Olá ClearMaster! 👋\n\n` +
+      `Fiz o orçamento pelo site e gostaria de confirmar:\n\n` +
+      `*Serviço:* Higienização de ${nomeServico}\n` +
+      `*Modelo:* ${item.label}\n` +
+      `*Valor do serviço:* R$ ${preco},00\n` +
+      `*Cidade:* ${calcCidade}\n` +
+      (calcTaxa > 0 ? `*Deslocamento:* R$ ${calcTaxa},00\n*Total estimado:* R$ ${totalEstimado},00\n` : `*Deslocamento:* Sem taxa\n`) +
+      `\nPoderia confirmar o agendamento?`;
+
+    content.innerHTML = `
+      <div class="calc-resultado-servico">Higienização de ${nomeServico}</div>
+      <div class="calc-resultado-preco">R$ ${preco},00</div>
+      <div class="calc-resultado-detalhe">${item.label}</div>
+      <div class="calc-resultado-detalhe">📍 ${calcCidade}</div>
+      ${calcTaxa > 0
+        ? `<div class="calc-resultado-taxa"><i class="fas fa-car"></i> + R$ ${calcTaxa},00 deslocamento → Total estimado: R$ ${totalEstimado},00</div>`
+        : `<div class="calc-resultado-taxa" style="color:#4ade80;border-color:rgba(74,222,128,0.3);background:rgba(74,222,128,0.07)"><i class="fas fa-check"></i> Sem taxa de deslocamento</div>`
+      }
+      <p style="font-size:0.82rem;color:var(--texto-muted);margin:0 0 16px;">⚠️ Valor estimado. O preço final será confirmado pelo WhatsApp.</p>
+      <a href="https://wa.me/5535992469549?text=${encodeURIComponent(msgWpp)}" target="_blank" class="btn btn-whatsapp">
+        <i class="fab fa-whatsapp"></i> Confirmar pelo WhatsApp
+      </a>
+    `;
+    irParaPasso('passo-resultado');
+  };
+
+  function mostrarAvaliacaoImpermeabilizacao() {
+    const msgWpp = `Olá ClearMaster! 👋\n\nGostaria de um orçamento para *impermeabilização*.\nVou enviar uma foto para avaliação!`;
+    const content = document.getElementById('calc-resultado-content');
+    content.innerHTML = `
+      <div class="calc-resultado-avaliacao">
+        <i class="fas fa-camera"></i>
+        <p><strong style="color:var(--texto-branco)">Impermeabilização precisa de avaliação por foto</strong><br><br>
+        O valor varia conforme o tipo de tecido e tamanho do estofado. Envie uma foto pelo WhatsApp e te passamos o orçamento rapidinho!</p>
+      </div>
+      <a href="https://wa.me/5535992469549?text=${encodeURIComponent(msgWpp)}" target="_blank" class="btn btn-whatsapp">
+        <i class="fab fa-whatsapp"></i> Enviar foto pelo WhatsApp
+      </a>
+    `;
+  }
+
+  function irParaPasso(id) {
+    document.querySelectorAll('.calc-step').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  window.voltarPasso = function(num) {
+    irParaPasso('passo-' + num);
+  };
+
+  window.reiniciarCalc = function() {
+    calcServico = null; calcModelo = null; calcCidade = ''; calcTaxa = 0;
+    document.querySelectorAll('.calc-opcao').forEach(o => o.classList.remove('selected'));
+    irParaPasso('passo-1');
+  };
+
+
+  // ============ CALCULADORA NO CONTATO ============
+  let cServico = null, cModelo = null, cCidade = '', cTaxa = 0;
+
+  window.cIrPasso = function(id) {
+    document.querySelectorAll('#contato .calc-step').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  };
+
+  window.cEscolherServico = function(servico) {
+    cServico = servico;
+    if (servico === 'impermeabilizacao') {
+      const msgWpp = `Olá ClearMaster! 👋\n\nGostaria de um orçamento para *impermeabilização*.\nVou enviar uma foto para avaliação!`;
+      document.getElementById('c-resultado-content').innerHTML = `
+        <div class="calc-resultado-avaliacao">
+          <i class="fas fa-camera"></i>
+          <p><strong style="color:var(--texto-branco)">Impermeabilização precisa de avaliação por foto</strong><br><br>
+          O valor varia conforme o tipo de tecido e tamanho. Envie uma foto e te passamos o orçamento rapidinho!</p>
+        </div>
+        <a href="https://wa.me/5535992469549?text=${encodeURIComponent(msgWpp)}" target="_blank" class="btn btn-whatsapp" style="width:100%;justify-content:center;">
+          <i class="fab fa-whatsapp"></i> Enviar foto pelo WhatsApp
+        </a>`;
+      cIrPasso('c-passo-resultado');
+      return;
+    }
+    const titulo = document.getElementById('c-passo2-titulo');
+    const opcoes = document.getElementById('c-passo2-opcoes');
+    titulo.textContent = servico === 'sofa' ? 'Qual o modelo do sofá?' : 'Qual o tamanho do colchão?';
+    opcoes.innerHTML = '';
+    precos[servico].forEach((item, i) => {
+      const div = document.createElement('div');
+      div.className = 'calc-opcao';
+      div.innerHTML = `<i class="fas fa-${servico === 'sofa' ? 'couch' : 'bed'}"></i><span>${item.label}</span>`;
+      div.onclick = () => { cModelo = i; cIrPasso('c-passo-3'); };
+      opcoes.appendChild(div);
+    });
+    cIrPasso('c-passo-2');
+  };
+
+  window.cEscolherCidade = function(cidade, taxa, el) {
+    cCidade = cidade; cTaxa = taxa;
+    document.querySelectorAll('#c-passo3-cidades .calc-opcao').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    setTimeout(() => cMostrarResultado(), 300);
+  };
+
+  function cMostrarResultado() {
+    const content = document.getElementById('c-resultado-content');
+
+    if (cTaxa === -1) {
+      const msgWpp = `Olá ClearMaster! 👋\n\nGostaria de um orçamento:\n*Serviço:* Higienização de ${cServico === 'sofa' ? 'Sofá' : 'Colchão'}\n*Modelo:* ${precos[cServico][cModelo].label}\n*Cidade:* ${cCidade}\n\nPoderia me informar o valor do deslocamento?`;
+      content.innerHTML = `
+        <div class="calc-resultado-avaliacao">
+          <i class="fas fa-map-marker-alt"></i>
+          <p><strong style="color:var(--texto-branco)">Cidade não listada</strong><br><br>
+          Para sua cidade o valor do deslocamento é calculado individualmente. Fale conosco!</p>
+        </div>
+        <a href="https://wa.me/5535992469549?text=${encodeURIComponent(msgWpp)}" target="_blank" class="btn btn-whatsapp" style="width:100%;justify-content:center;">
+          <i class="fab fa-whatsapp"></i> Consultar pelo WhatsApp
+        </a>`;
+      cIrPasso('c-passo-resultado');
+      return;
+    }
+
+    const item = precos[cServico][cModelo];
+    const preco = item.preco;
+    const total = cTaxa > 0 ? preco + cTaxa : preco;
+    const msgWpp =
+      `Olá ClearMaster! 👋\n\nFiz o orçamento pelo site:\n\n` +
+      `*Serviço:* Higienização de ${cServico === 'sofa' ? 'Sofá' : 'Colchão'}\n` +
+      `*Modelo:* ${item.label}\n*Valor:* R$ ${preco},00\n*Cidade:* ${cCidade}\n` +
+      (cTaxa > 0 ? `*Deslocamento:* R$ ${cTaxa},00\n*Total estimado:* R$ ${total},00\n` : `*Deslocamento:* Sem taxa\n`) +
+      `\nPoderia confirmar o agendamento?`;
+
+    content.innerHTML = `
+      <div class="calc-resultado-servico">Higienização de ${cServico === 'sofa' ? 'Sofá' : 'Colchão'}</div>
+      <div class="calc-resultado-preco">R$ ${preco},00</div>
+      <div class="calc-resultado-detalhe">${item.label}</div>
+      <div class="calc-resultado-detalhe">📍 ${cCidade}</div>
+      ${cTaxa > 0
+        ? `<div class="calc-resultado-taxa"><i class="fas fa-car"></i> + R$ ${cTaxa},00 deslocamento → Total: R$ ${total},00</div>`
+        : `<div class="calc-resultado-taxa" style="color:#4ade80;border-color:rgba(74,222,128,0.3);background:rgba(74,222,128,0.07)"><i class="fas fa-check"></i> Sem taxa de deslocamento</div>`
+      }
+      <p style="font-size:0.82rem;color:var(--texto-muted);margin:0 0 16px;">⚠️ Valor estimado. Confirme pelo WhatsApp.</p>
+      <a href="https://wa.me/5535992469549?text=${encodeURIComponent(msgWpp)}" target="_blank" class="btn btn-whatsapp" style="width:100%;justify-content:center;">
+        <i class="fab fa-whatsapp"></i> Confirmar pelo WhatsApp
+      </a>`;
+    cIrPasso('c-passo-resultado');
+  }
+
+  window.cReiniciar = function() {
+    cServico = null; cModelo = null; cCidade = ''; cTaxa = 0;
+    document.querySelectorAll('#contato .calc-opcao').forEach(o => o.classList.remove('selected'));
+    cIrPasso('c-passo-1');
+  };
+

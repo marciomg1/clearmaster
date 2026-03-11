@@ -46,6 +46,7 @@
         <li class="nav-item"><a href="#servicos" class="nav-link">Serviços</a></li>
         <li class="nav-item"><a href="#como-funciona" class="nav-link">Como Funciona</a></li>
         <li class="nav-item"><a href="#galeria" class="nav-link">Galeria</a></li>
+        <li class="nav-item"><a href="#orcamento" class="nav-link">Orçamento</a></li>
         <li class="nav-item"><a href="#contato" class="nav-link">Contato</a></li>
       </ul>
       <div class="hamburger">
@@ -102,8 +103,8 @@
       </div>
       <div class="sobre-nos-text">
         <h2>Sobre a ClearMaster Lavanderia</h2>
-        <p>Na ClearMaster, transformamos ambientes e ajudamos a melhorar a qualidade de vida desde 2016. O que começou como paixão por limpeza profissional tornou-se referência em higienização e impermeabilização de estofados.</p>
-        <p>Nossa missão é oferecer ambientes mais limpos, saudáveis e protegidos. Contamos com profissionais treinados e certificados, sempre atualizados nas melhores técnicas de higienização e impermeabilização.</p>
+        <p>Na ClearMaster, transformamos ambientes e melhoramos a qualidade de vida desde 2016. O que começou como uma paixão por limpeza profunda tornou-se referência em higienização e impermeabilização avançada.</p>
+        <p>Nossa missão é proporcionar ambientes mais limpos, saudáveis e protegidos. Contamos com profissionais treinados e certificados, especializados em técnicas avançadas e em constante atualização.</p>
         <a href="#contato" class="btn btn-primario mt-2">
           <i class="fas fa-envelope"></i> Falar com um especialista
         </a>
@@ -179,6 +180,78 @@
 
 <!-- IMPERMEABILIZAÇÃO -->
 <section id="impermeabilizacao" class="section">
+
+<!-- CALCULADORA DE ORÇAMENTO -->
+<section id="orcamento" class="section section-alternativa">
+  <div class="container">
+    <div class="section-header">
+      <h2>Quanto vai custar?</h2>
+      <p>Descubra o valor do seu serviço em segundos</p>
+    </div>
+
+    <div class="calc-wrapper">
+
+      <!-- PASSO 1 — SERVIÇO -->
+      <div class="calc-step active" id="passo-1">
+        <div class="calc-step-header">
+          <div class="calc-step-number">1</div>
+          <h3>Qual serviço você precisa?</h3>
+        </div>
+        <div class="calc-opcoes">
+          <div class="calc-opcao" onclick="escolherServico('sofa')">
+            <i class="fas fa-couch"></i>
+            <span>Higienização de Sofá</span>
+          </div>
+          <div class="calc-opcao" onclick="escolherServico('colchao')">
+            <i class="fas fa-bed"></i>
+            <span>Higienização de Colchão</span>
+          </div>
+          <div class="calc-opcao" onclick="escolherServico('impermeabilizacao')">
+            <i class="fas fa-shield-alt"></i>
+            <span>Impermeabilização</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PASSO 2 — MODELO -->
+      <div class="calc-step" id="passo-2">
+        <div class="calc-step-header">
+          <div class="calc-step-number">2</div>
+          <h3 id="passo2-titulo">Qual o modelo?</h3>
+        </div>
+        <div class="calc-opcoes" id="passo2-opcoes"></div>
+        <button class="calc-voltar" onclick="voltarPasso(1)"><i class="fas fa-arrow-left"></i> Voltar</button>
+      </div>
+
+      <!-- PASSO 3 — CIDADE -->
+      <div class="calc-step" id="passo-3">
+        <div class="calc-step-header">
+          <div class="calc-step-number">3</div>
+          <h3>Qual sua cidade?</h3>
+        </div>
+        <div class="calc-opcoes" id="passo3-cidades">
+          <div class="calc-opcao" onclick="escolherCidade('Passos', 0)"><i class="fas fa-map-marker-alt"></i><span>Passos</span></div>
+          <div class="calc-opcao" onclick="escolherCidade('Alpinópolis', 0)"><i class="fas fa-map-marker-alt"></i><span>Alpinópolis</span></div>
+          <div class="calc-opcao" onclick="escolherCidade('São João Batista do Glória', 30)"><i class="fas fa-map-marker-alt"></i><span>São João Batista do Glória</span></div>
+          <div class="calc-opcao" onclick="escolherCidade('São José da Barra', 30)"><i class="fas fa-map-marker-alt"></i><span>São José da Barra</span></div>
+          <div class="calc-opcao" onclick="escolherCidade('Itaú de Minas', 30)"><i class="fas fa-map-marker-alt"></i><span>Itaú de Minas</span></div>
+          <div class="calc-opcao" onclick="escolherCidade('São Sebastião do Paraíso', 110)"><i class="fas fa-map-marker-alt"></i><span>São Sebastião do Paraíso</span></div>
+          <div class="calc-opcao" onclick="escolherCidade('Capitólio', 120)"><i class="fas fa-map-marker-alt"></i><span>Capitólio</span></div>
+          <div class="calc-opcao" onclick="escolherCidade('Outra cidade', -1)"><i class="fas fa-question-circle"></i><span>Outra cidade</span></div>
+        </div>
+        <p class="calc-nota"><i class="fas fa-info-circle"></i> O deslocamento pode ser isento para serviços de maior porte — o valor será informado ao final.</p>
+        <button class="calc-voltar" onclick="voltarPasso(2)"><i class="fas fa-arrow-left"></i> Voltar</button>
+      </div>
+
+      <!-- RESULTADO -->
+      <div class="calc-step" id="passo-resultado">
+        <div class="calc-resultado-wrap" id="calc-resultado-content"></div>
+        <button class="calc-voltar" onclick="reiniciarCalc()"><i class="fas fa-redo"></i> Novo orçamento</button>
+      </div>
+
+    </div>
+  </div>
+</section>
   <div class="container">
     <div class="sobre-nos-content">
       <div class="sobre-nos-text">
@@ -396,83 +469,66 @@
 <section id="contato" class="section section-alternativa">
   <div class="container">
     <div class="section-header">
-      <h2>Entre em Contato</h2>
-      <p>Estamos prontos para atender você e transformar seus estofados</p>
+      <h2>Quanto vai custar?</h2>
+      <p>Simule agora e confirme pelo WhatsApp</p>
     </div>
-    <div class="contato-container">
-      <div class="contato-info">
-        <div class="contato-info-item">
-          <i class="fab fa-whatsapp"></i>
-          <div class="contato-info-content">
-            <h4>Telefone / WhatsApp</h4>
-            <p><a href="tel:+5535992469549">(35) 99246-9549</a></p>
+    <div class="calc-destaque-wrapper">
+
+      <!-- PASSO 1 -->
+      <div class="calc-step active" id="c-passo-1">
+        <div class="calc-step-header">
+          <div class="calc-step-number">1</div>
+          <h3>Qual serviço você precisa?</h3>
+        </div>
+        <div class="calc-opcoes calc-opcoes-3">
+          <div class="calc-opcao" onclick="cEscolherServico('sofa')">
+            <i class="fas fa-couch"></i><span>Higienização de Sofá</span>
+          </div>
+          <div class="calc-opcao" onclick="cEscolherServico('colchao')">
+            <i class="fas fa-bed"></i><span>Higienização de Colchão</span>
+          </div>
+          <div class="calc-opcao" onclick="cEscolherServico('impermeabilizacao')">
+            <i class="fas fa-shield-alt"></i><span>Impermeabilização</span>
           </div>
         </div>
-        <div class="contato-info-item">
-          <i class="fas fa-clock"></i>
-          <div class="contato-info-content">
-            <h4>Horário de Atendimento</h4>
-            <p>Seg–Sex: 7h às 18h · Sábado: 7h às 12h</p>
-            <p style="font-size:0.82rem; color:var(--dourado);">Orçamentos: 24h por dia</p>
-          </div>
-        </div>
-        <div class="contato-info-item">
-          <i class="fas fa-map-marker-alt"></i>
-          <div class="contato-info-content">
-            <h4>Área de Cobertura</h4>
-            <p>Atendemos Passos-MG e região:</p>
-            <ul>
-              <li>São João Batista do Glória</li>
-              <li>Alpinópolis</li>
-              <li>São José da Barra</li>
-              <li>Itaú de Minas</li>
-              <li>E outras localidades (consulte)</li>
-            </ul>
-          </div>
-        </div>
-        <a href="https://wa.me/5535992469549" class="btn btn-whatsapp mt-2" target="_blank">
-          <i class="fab fa-whatsapp"></i> Falar no WhatsApp Agora
-        </a>
       </div>
 
-      <div class="contato-form">
-        <div class="form-whatsapp-info">
-          <i class="fab fa-whatsapp"></i>
-          <span>Ao enviar, você será redirecionado ao nosso WhatsApp com a mensagem pronta!</span>
+      <!-- PASSO 2 -->
+      <div class="calc-step" id="c-passo-2">
+        <div class="calc-step-header">
+          <div class="calc-step-number">2</div>
+          <h3 id="c-passo2-titulo">Qual o modelo?</h3>
         </div>
-        <form id="contato-form">
-          <div class="form-group">
-            <label for="nome">Nome Completo</label>
-            <input type="text" id="nome" class="form-control" placeholder="Seu nome completo">
-          </div>
-          <div class="form-group">
-            <label for="telefone">Telefone</label>
-            <input type="tel" id="telefone" class="form-control" placeholder="(35) 9 0000-0000">
-          </div>
-          <div class="form-group">
-            <label for="email">E-mail</label>
-            <input type="email" id="email" class="form-control" placeholder="seu@email.com">
-          </div>
-          <div class="form-group">
-            <label for="servico">Serviço de Interesse</label>
-            <select id="servico" class="form-control">
-              <option value="">Selecione o serviço</option>
-              <option value="higienizacao-sofa">Higienização de Sofá</option>
-              <option value="higienizacao-colchao">Higienização de Colchão</option>
-              <option value="impermeabilizacao">Impermeabilização</option>
-              <option value="combo">Combo Higienização + Impermeabilização</option>
-              <option value="outro">Outro</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="mensagem">Mensagem</label>
-            <textarea id="mensagem" class="form-control" placeholder="Descreva o que você precisa..."></textarea>
-          </div>
-          <button type="submit" class="btn btn-primario" style="width:100%; justify-content:center;">
-            <i class="fab fa-whatsapp"></i> Enviar pelo WhatsApp
-          </button>
-        </form>
+        <div class="calc-opcoes" id="c-passo2-opcoes"></div>
+        <button class="calc-voltar" onclick="cIrPasso('c-passo-1')"><i class="fas fa-arrow-left"></i> Voltar</button>
       </div>
+
+      <!-- PASSO 3 -->
+      <div class="calc-step" id="c-passo-3">
+        <div class="calc-step-header">
+          <div class="calc-step-number">3</div>
+          <h3>Qual sua cidade?</h3>
+        </div>
+        <div class="calc-opcoes" id="c-passo3-cidades">
+          <div class="calc-opcao" onclick="cEscolherCidade('Passos', 0, this)"><i class="fas fa-map-marker-alt"></i><span>Passos</span></div>
+          <div class="calc-opcao" onclick="cEscolherCidade('Alpinópolis', 0, this)"><i class="fas fa-map-marker-alt"></i><span>Alpinópolis</span></div>
+          <div class="calc-opcao" onclick="cEscolherCidade('São João Batista do Glória', 30, this)"><i class="fas fa-map-marker-alt"></i><span>São João Batista do Glória</span></div>
+          <div class="calc-opcao" onclick="cEscolherCidade('São José da Barra', 30, this)"><i class="fas fa-map-marker-alt"></i><span>São José da Barra</span></div>
+          <div class="calc-opcao" onclick="cEscolherCidade('Itaú de Minas', 30, this)"><i class="fas fa-map-marker-alt"></i><span>Itaú de Minas</span></div>
+          <div class="calc-opcao" onclick="cEscolherCidade('São Sebastião do Paraíso', 110, this)"><i class="fas fa-map-marker-alt"></i><span>São Sebastião do Paraíso</span></div>
+          <div class="calc-opcao" onclick="cEscolherCidade('Capitólio', 120, this)"><i class="fas fa-map-marker-alt"></i><span>Capitólio</span></div>
+          <div class="calc-opcao" onclick="cEscolherCidade('Outra cidade', -1, this)"><i class="fas fa-question-circle"></i><span>Outra cidade</span></div>
+        </div>
+        <p class="calc-nota"><i class="fas fa-info-circle"></i> O deslocamento pode ser isento para serviços de maior porte — o valor será informado ao final.</p>
+        <button class="calc-voltar" onclick="cIrPasso('c-passo-2')"><i class="fas fa-arrow-left"></i> Voltar</button>
+      </div>
+
+      <!-- RESULTADO -->
+      <div class="calc-step" id="c-passo-resultado">
+        <div class="calc-resultado-wrap" id="c-resultado-content"></div>
+        <button class="calc-voltar" onclick="cReiniciar()"><i class="fas fa-redo"></i> Novo orçamento</button>
+      </div>
+
     </div>
   </div>
 </section>
@@ -516,8 +572,9 @@
         <h4 class="footer-heading">Contato</h4>
         <ul class="footer-links">
           <li><i class="fas fa-phone-alt"></i> (35) 99246-9549</li>
-          <li><i class="fas fa-clock"></i> Seg–Sáb: 7h às 18h</li>
-          <li><i class="fas fa-map-marker-alt"></i> Passos - MG</li>
+          <li><i class="fas fa-clock"></i> Seg–Sex: 7h às 18h · Sáb: 7h às 12h</li>
+          <li><i class="fab fa-whatsapp"></i> Orçamentos: 24h por dia</li>
+          <li><i class="fas fa-map-marker-alt"></i> Passos, Alpinópolis, São João Batista do Glória, São José da Barra, Itaú de Minas, Capitólio e região</li>
         </ul>
       </div>
     </div>
@@ -537,9 +594,9 @@
 
 <!-- ORÇAMENTO FLUTUANTE -->
 <div class="orcamento-float">
-  <a href="#contato">
+  <a href="#orcamento">
     <i class="fas fa-tag"></i>
-    <span>Pedir Orçamento</span>
+    <span>💰 Ver meu preço agora</span>
   </a>
 </div>
 
