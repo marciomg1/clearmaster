@@ -608,44 +608,54 @@ document.addEventListener('DOMContentLoaded', function () {
       return '★'.repeat(n) + '☆'.repeat(5 - n);
     }
 
+    function renderAvaliacoes(result) {
+      const nota = result.rating || 4.9;
+      const total = result.user_ratings_total || 0;
+      document.getElementById('google-nota').textContent = `${nota} ⭐ (${total} avaliações)`;
+
+      const reviews = (result.reviews || []).filter(r => r.text && r.text.length > 20).slice(0, 5);
+      if (!reviews.length) { usarFallback(); return; }
+
+      const track = document.getElementById('google-reviews-track');
+      track.innerHTML = reviews.map(r => {
+        const inicial = r.author_name ? r.author_name[0].toUpperCase() : '?';
+        const stars = estrelas(r.rating || 5);
+        const foto = r.profile_photo_url
+          ? `<img src="${r.profile_photo_url}" alt="${r.author_name}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;">`
+          : `<div class="depoimento-avatar">${inicial}</div>`;
+        return `
+          <div class="depoimento-card animate-on-scroll">
+            <span class="quote-icon">"</span>
+            <p class="depoimento-texto">${r.text}</p>
+            <div class="depoimento-autor">
+              ${foto}
+              <div class="depoimento-autor-info">
+                <h4>${r.author_name}</h4>
+                <div class="estrelas" style="color:var(--dourado)">${stars}</div>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
     function carregarAvaliacoes() {
       const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${PLACE_ID}&fields=name,rating,reviews,user_ratings_total&language=pt-BR&key=${API_KEY}`;
+      const proxies = [
+        `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
+      ];
 
-      fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`)
-        .then(r => r.json())
-        .then(data => {
-          const result = data.result;
-          if (!result) { usarFallback(); return; }
-
-          const nota = result.rating || 5;
-          const total = result.user_ratings_total || 0;
-          document.getElementById('google-nota').textContent = `${nota} ⭐ (${total} avaliações)`;
-
-          const reviews = (result.reviews || []).filter(r => r.text && r.text.length > 20).slice(0, 5);
-          if (!reviews.length) { usarFallback(); return; }
-
-          const track = document.getElementById('google-reviews-track');
-          track.innerHTML = reviews.map(r => {
-            const inicial = r.author_name ? r.author_name[0].toUpperCase() : '?';
-            const stars = estrelas(r.rating || 5);
-            const foto = r.profile_photo_url
-              ? `<img src="${r.profile_photo_url}" alt="${r.author_name}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;">`
-              : `<div class="depoimento-avatar">${inicial}</div>`;
-            return `
-              <div class="depoimento-card animate-on-scroll">
-                <span class="quote-icon">"</span>
-                <p class="depoimento-texto">${r.text}</p>
-                <div class="depoimento-autor">
-                  ${foto}
-                  <div class="depoimento-autor-info">
-                    <h4>${r.author_name}</h4>
-                    <div class="estrelas" style="color:var(--dourado)">${stars}</div>
-                  </div>
-                </div>
-              </div>`;
-          }).join('');
-        })
-        .catch(() => usarFallback());
+      function tentarProxy(i) {
+        if (i >= proxies.length) { usarFallback(); return; }
+        fetch(proxies[i])
+          .then(r => r.json())
+          .then(data => {
+            if (data.result) renderAvaliacoes(data.result);
+            else tentarProxy(i + 1);
+          })
+          .catch(() => tentarProxy(i + 1));
+      }
+      tentarProxy(0);
     }
 
     function usarFallback() {
