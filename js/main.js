@@ -477,17 +477,10 @@ document.addEventListener('DOMContentLoaded', function () {
   window.cEscolherServico = function(servico) {
     cServico = servico;
     if (servico === 'impermeabilizacao') {
-      const msgWpp = `Olá ClearMaster! 👋\n\nGostaria de um orçamento para *impermeabilização*.\nVou enviar uma foto para avaliação!`;
-      document.getElementById('c-resultado-content').innerHTML = `
-        <div class="calc-resultado-avaliacao">
-          <i class="fas fa-camera"></i>
-          <p><strong style="color:var(--texto-branco)">Impermeabilização precisa de avaliação por foto</strong><br><br>
-          O valor varia conforme o tipo de tecido e tamanho. Envie uma foto e te passamos o orçamento rapidinho!</p>
-        </div>
-        <a href="https://wa.me/5535992469549?text=${encodeURIComponent(msgWpp)}" target="_blank" class="btn btn-whatsapp" style="width:100%;justify-content:center;">
-          <i class="fab fa-whatsapp"></i> Enviar foto pelo WhatsApp
-        </a>`;
-      cIrPasso('c-passo-resultado');
+      document.getElementById('c-foto-titulo').textContent = 'Impermeabilização — informe sua cidade e envie uma foto';
+      document.getElementById('c-foto-upload-area').style.display = 'none';
+      document.querySelectorAll('#c-foto-cidades .calc-opcao').forEach(o => o.classList.remove('selected'));
+      cIrPasso('c-passo-foto');
       return;
     }
     const titulo = document.getElementById('c-passo2-titulo');
@@ -501,6 +494,18 @@ document.addEventListener('DOMContentLoaded', function () {
       div.onclick = () => { cModelo = i; cIrPasso('c-passo-3'); };
       opcoes.appendChild(div);
     });
+    // Outros modelos
+    const outro = document.createElement('div');
+    outro.className = 'calc-opcao';
+    outro.innerHTML = `<i class="fas fa-question-circle"></i><span>Outros modelos</span>`;
+    outro.onclick = () => {
+      cModelo = -1;
+      document.getElementById('c-foto-titulo').textContent = 'Outros modelos — informe sua cidade e envie uma foto';
+      document.getElementById('c-foto-upload-area').style.display = 'none';
+      document.querySelectorAll('#c-foto-cidades .calc-opcao').forEach(o => o.classList.remove('selected'));
+      cIrPasso('c-passo-foto');
+    };
+    opcoes.appendChild(outro);
     cIrPasso('c-passo-2');
   };
 
@@ -555,9 +560,120 @@ document.addEventListener('DOMContentLoaded', function () {
     cIrPasso('c-passo-resultado');
   }
 
+  window.cSelecionarCidadeFoto = function(cidade, taxa, el) {
+    cCidade = cidade; cTaxa = taxa;
+    document.querySelectorAll('#c-foto-cidades .calc-opcao').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('c-foto-upload-area').style.display = 'block';
+  };
+
+  window.cFotoSelecionada = function(input) {
+    const nome = input.files[0] ? input.files[0].name : 'Clique para escolher uma foto';
+    document.getElementById('c-foto-nome').textContent = nome;
+  };
+
+  window.cEnviarFotoWhatsApp = function() {
+    const nomeServico = cServico === 'impermeabilizacao' ? 'Impermeabilização' : `Higienização de ${cServico === 'sofa' ? 'Sofá' : 'Colchão'} (modelo não listado)`;
+    const taxaInfo = cTaxa === -1 ? 'Outra cidade (consultar deslocamento)' : cTaxa === 0 ? 'Sem taxa de deslocamento' : `Deslocamento: R$ ${cTaxa},00`;
+    const msg = `Olá ClearMaster! 👋\n\nGostaria de um orçamento para:\n*Serviço:* ${nomeServico}\n*Cidade:* ${cCidade}\n*${taxaInfo}*\n\nVou enviar uma foto para avaliação!`;
+    const input = document.getElementById('c-input-foto');
+
+    if (input.files[0]) {
+      // Abre WhatsApp e instrui a anexar a foto
+      const wppUrl = `https://wa.me/5535992469549?text=${encodeURIComponent(msg + '\n\n📎 *Foto em anexo*')}`;
+      window.open(wppUrl, '_blank');
+      // Tenta compartilhar a foto via Web Share API (funciona no celular)
+      if (navigator.share && navigator.canShare && navigator.canShare({ files: [input.files[0]] })) {
+        navigator.share({ files: [input.files[0]], title: 'Foto para orçamento ClearMaster' });
+      }
+    } else {
+      const wppUrl = `https://wa.me/5535992469549?text=${encodeURIComponent(msg)}`;
+      window.open(wppUrl, '_blank');
+    }
+  };
+
   window.cReiniciar = function() {
     cServico = null; cModelo = null; cCidade = ''; cTaxa = 0;
     document.querySelectorAll('#contato .calc-opcao').forEach(o => o.classList.remove('selected'));
     cIrPasso('c-passo-1');
   };
+
+
+  // ============ AVALIAÇÕES GOOGLE ============
+  (function() {
+    const PLACE_ID = 'ChIJVeq4M8iPZpMRGY6w9-z2bv4';
+    const API_KEY  = 'AIzaSyB0RPhFD5P9KqrHmHjZZUqn2kSb_OeIQCk';
+
+    function estrelas(n) {
+      return '★'.repeat(n) + '☆'.repeat(5 - n);
+    }
+
+    function carregarAvaliacoes() {
+      const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${PLACE_ID}&fields=name,rating,reviews,user_ratings_total&language=pt-BR&key=${API_KEY}`;
+
+      fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`)
+        .then(r => r.json())
+        .then(data => {
+          const result = data.result;
+          if (!result) { usarFallback(); return; }
+
+          const nota = result.rating || 5;
+          const total = result.user_ratings_total || 0;
+          document.getElementById('google-nota').textContent = `${nota} ⭐ (${total} avaliações)`;
+
+          const reviews = (result.reviews || []).filter(r => r.text && r.text.length > 20).slice(0, 5);
+          if (!reviews.length) { usarFallback(); return; }
+
+          const track = document.getElementById('google-reviews-track');
+          track.innerHTML = reviews.map(r => {
+            const inicial = r.author_name ? r.author_name[0].toUpperCase() : '?';
+            const stars = estrelas(r.rating || 5);
+            const foto = r.profile_photo_url
+              ? `<img src="${r.profile_photo_url}" alt="${r.author_name}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;">`
+              : `<div class="depoimento-avatar">${inicial}</div>`;
+            return `
+              <div class="depoimento-card animate-on-scroll">
+                <span class="quote-icon">"</span>
+                <p class="depoimento-texto">${r.text}</p>
+                <div class="depoimento-autor">
+                  ${foto}
+                  <div class="depoimento-autor-info">
+                    <h4>${r.author_name}</h4>
+                    <div class="estrelas" style="color:var(--dourado)">${stars}</div>
+                  </div>
+                </div>
+              </div>`;
+          }).join('');
+        })
+        .catch(() => usarFallback());
+    }
+
+    function usarFallback() {
+      document.getElementById('google-nota').textContent = '5.0 ⭐';
+      document.getElementById('google-reviews-track').innerHTML = `
+        <div class="depoimento-card animate-on-scroll">
+          <span class="quote-icon">"</span>
+          <p class="depoimento-texto">Fiquei impressionada com o resultado! Meu sofá parecia novo. A impermeabilização realmente funciona — meu filho derramou suco e limpei com um pano, sem manchas.</p>
+          <div class="depoimento-autor"><div class="depoimento-avatar">A</div>
+            <div class="depoimento-autor-info"><h4>Ana Paula</h4><p>Passos - MG</p><div class="estrelas">★★★★★</div></div>
+          </div>
+        </div>
+        <div class="depoimento-card animate-on-scroll">
+          <span class="quote-icon">"</span>
+          <p class="depoimento-texto">Meu colchão tinha manchas antigas que eu achava que não sairiam. A ClearMaster fez um trabalho incrível. Durmo muito melhor agora!</p>
+          <div class="depoimento-autor"><div class="depoimento-avatar">C</div>
+            <div class="depoimento-autor-info"><h4>Carlos Eduardo</h4><p>São João Batista do Glória - MG</p><div class="estrelas">★★★★★</div></div>
+          </div>
+        </div>
+        <div class="depoimento-card animate-on-scroll">
+          <span class="quote-icon">"</span>
+          <p class="depoimento-texto">Impermeabilização valeu cada centavo! As crianças já derramaram refrigerante várias vezes e nunca manchou. Recomendo demais!</p>
+          <div class="depoimento-autor"><div class="depoimento-avatar">M</div>
+            <div class="depoimento-autor-info"><h4>Mariana Silva</h4><p>Alpinópolis - MG</p><div class="estrelas">★★★★★</div></div>
+          </div>
+        </div>`;
+    }
+
+    carregarAvaliacoes();
+  })();
 

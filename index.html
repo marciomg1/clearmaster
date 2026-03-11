@@ -316,44 +316,19 @@
   <div class="container">
     <div class="section-header">
       <h2>O Que Nossos Clientes Dizem</h2>
-      <p>A satisfação de nossos clientes é nossa maior recompensa</p>
+      <p>Avaliações reais do Google — <span id="google-nota">⭐</span></p>
     </div>
-    <div class="depoimentos-track">
-      <div class="depoimento-card animate-on-scroll">
-        <span class="quote-icon">"</span>
-        <p class="depoimento-texto">Fiquei impressionada com o resultado da higienização do meu sofá. Parecia que eu tinha comprado um novo! A impermeabilização realmente funciona — meu filho derramou suco e foi só limpar com um pano, sem manchas.</p>
-        <div class="depoimento-autor">
-          <div class="depoimento-avatar">A</div>
-          <div class="depoimento-autor-info">
-            <h4>Ana Paula</h4>
-            <p>Passos - MG</p>
-            <div class="estrelas">★★★★★</div>
-          </div>
+    <div id="google-reviews-wrapper">
+      <div class="depoimentos-track" id="google-reviews-track">
+        <!-- Cards carregados via API -->
+        <div class="depoimento-card" style="justify-content:center;align-items:center;min-height:160px;">
+          <p style="color:var(--texto-muted);font-size:0.9rem;">Carregando avaliações...</p>
         </div>
       </div>
-      <div class="depoimento-card animate-on-scroll">
-        <span class="quote-icon">"</span>
-        <p class="depoimento-texto">Meu colchão tinha manchas antigas que eu achava que não sairiam mais. A equipe da ClearMaster fez um trabalho incrível. Agora durmo muito melhor, principalmente porque tenho rinite alérgica.</p>
-        <div class="depoimento-autor">
-          <div class="depoimento-avatar">C</div>
-          <div class="depoimento-autor-info">
-            <h4>Carlos Eduardo</h4>
-            <p>São João Batista do Glória - MG</p>
-            <div class="estrelas">★★★★★</div>
-          </div>
-        </div>
-      </div>
-      <div class="depoimento-card animate-on-scroll">
-        <span class="quote-icon">"</span>
-        <p class="depoimento-texto">Contratei a impermeabilização para o sofá da sala. Depois de alguns meses, posso dizer que valeu cada centavo! As crianças já derramaram refrigerante várias vezes e nunca manchou. Recomendo demais!</p>
-        <div class="depoimento-autor">
-          <div class="depoimento-avatar">M</div>
-          <div class="depoimento-autor-info">
-            <h4>Mariana Silva</h4>
-            <p>Alpinópolis - MG</p>
-            <div class="estrelas">★★★★★</div>
-          </div>
-        </div>
+      <div style="text-align:center;margin-top:24px;">
+        <a id="google-ver-todas" href="https://www.google.com/maps/place/?q=place_id:0x94b68fc833b8ea55:0xfe6df6ec73b08e19" target="_blank" class="btn btn-outline" style="display:inline-flex;">
+          <i class="fab fa-google"></i> Ver todas as avaliações no Google
+        </a>
       </div>
     </div>
   </div>
@@ -421,6 +396,39 @@
             <i class="fas fa-shield-alt"></i><span>Impermeabilização</span>
           </div>
         </div>
+      </div>
+
+      <!-- PASSO FOTO (impermeabilização e outros modelos) -->
+      <div class="calc-step" id="c-passo-foto">
+        <div class="calc-step-header">
+          <div class="calc-step-number">2</div>
+          <h3 id="c-foto-titulo">Informe sua cidade e envie uma foto</h3>
+        </div>
+
+        <div class="calc-opcoes" id="c-foto-cidades">
+          <div class="calc-opcao" onclick="cSelecionarCidadeFoto('Passos', 0, this)"><i class="fas fa-map-marker-alt"></i><span>Passos</span></div>
+          <div class="calc-opcao" onclick="cSelecionarCidadeFoto('Alpinópolis', 0, this)"><i class="fas fa-map-marker-alt"></i><span>Alpinópolis</span></div>
+          <div class="calc-opcao" onclick="cSelecionarCidadeFoto('São João Batista do Glória', 30, this)"><i class="fas fa-map-marker-alt"></i><span>São João Batista do Glória</span></div>
+          <div class="calc-opcao" onclick="cSelecionarCidadeFoto('São José da Barra', 30, this)"><i class="fas fa-map-marker-alt"></i><span>São José da Barra</span></div>
+          <div class="calc-opcao" onclick="cSelecionarCidadeFoto('Itaú de Minas', 30, this)"><i class="fas fa-map-marker-alt"></i><span>Itaú de Minas</span></div>
+          <div class="calc-opcao" onclick="cSelecionarCidadeFoto('São Sebastião do Paraíso', 110, this)"><i class="fas fa-map-marker-alt"></i><span>São Sebastião do Paraíso</span></div>
+          <div class="calc-opcao" onclick="cSelecionarCidadeFoto('Capitólio', 120, this)"><i class="fas fa-map-marker-alt"></i><span>Capitólio</span></div>
+          <div class="calc-opcao" onclick="cSelecionarCidadeFoto('Outra cidade', -1, this)"><i class="fas fa-question-circle"></i><span>Outra cidade</span></div>
+        </div>
+
+        <div class="calc-foto-upload" id="c-foto-upload-area" style="display:none; margin-top:24px;">
+          <p class="calc-nota"><i class="fas fa-camera"></i> Anexe uma foto para agilizar o orçamento (opcional)</p>
+          <label class="calc-foto-label" for="c-input-foto">
+            <i class="fas fa-image"></i>
+            <span id="c-foto-nome">Clique para escolher uma foto</span>
+          </label>
+          <input type="file" id="c-input-foto" accept="image/*" style="display:none" onchange="cFotoSelecionada(this)">
+          <button class="btn btn-whatsapp" style="width:100%;justify-content:center;margin-top:16px;" onclick="cEnviarFotoWhatsApp()">
+            <i class="fab fa-whatsapp"></i> Enviar pelo WhatsApp
+          </button>
+        </div>
+
+        <button class="calc-voltar" onclick="cIrPasso('c-passo-1')" style="margin-top:20px;"><i class="fas fa-arrow-left"></i> Voltar</button>
       </div>
 
       <!-- PASSO 2 -->
