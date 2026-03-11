@@ -46,7 +46,7 @@
         <li class="nav-item"><a href="#servicos" class="nav-link">Serviços</a></li>
         <li class="nav-item"><a href="#como-funciona" class="nav-link">Como Funciona</a></li>
         <li class="nav-item"><a href="#galeria" class="nav-link">Galeria</a></li>
-        <li class="nav-item"><a href="#orcamento" class="nav-link">Orçamento</a></li>
+        <li class="nav-item"><a href="#contato" class="nav-link">Orçamento</a></li>
         <li class="nav-item"><a href="#contato" class="nav-link">Contato</a></li>
       </ul>
       <div class="hamburger">
@@ -181,77 +181,7 @@
 <!-- IMPERMEABILIZAÇÃO -->
 <section id="impermeabilizacao" class="section">
 
-<!-- CALCULADORA DE ORÇAMENTO -->
-<section id="orcamento" class="section section-alternativa">
-  <div class="container">
-    <div class="section-header">
-      <h2>Quanto vai custar?</h2>
-      <p>Descubra o valor do seu serviço em segundos</p>
-    </div>
 
-    <div class="calc-wrapper">
-
-      <!-- PASSO 1 — SERVIÇO -->
-      <div class="calc-step active" id="passo-1">
-        <div class="calc-step-header">
-          <div class="calc-step-number">1</div>
-          <h3>Qual serviço você precisa?</h3>
-        </div>
-        <div class="calc-opcoes">
-          <div class="calc-opcao" onclick="escolherServico('sofa')">
-            <i class="fas fa-couch"></i>
-            <span>Higienização de Sofá</span>
-          </div>
-          <div class="calc-opcao" onclick="escolherServico('colchao')">
-            <i class="fas fa-bed"></i>
-            <span>Higienização de Colchão</span>
-          </div>
-          <div class="calc-opcao" onclick="escolherServico('impermeabilizacao')">
-            <i class="fas fa-shield-alt"></i>
-            <span>Impermeabilização</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- PASSO 2 — MODELO -->
-      <div class="calc-step" id="passo-2">
-        <div class="calc-step-header">
-          <div class="calc-step-number">2</div>
-          <h3 id="passo2-titulo">Qual o modelo?</h3>
-        </div>
-        <div class="calc-opcoes" id="passo2-opcoes"></div>
-        <button class="calc-voltar" onclick="voltarPasso(1)"><i class="fas fa-arrow-left"></i> Voltar</button>
-      </div>
-
-      <!-- PASSO 3 — CIDADE -->
-      <div class="calc-step" id="passo-3">
-        <div class="calc-step-header">
-          <div class="calc-step-number">3</div>
-          <h3>Qual sua cidade?</h3>
-        </div>
-        <div class="calc-opcoes" id="passo3-cidades">
-          <div class="calc-opcao" onclick="escolherCidade('Passos', 0)"><i class="fas fa-map-marker-alt"></i><span>Passos</span></div>
-          <div class="calc-opcao" onclick="escolherCidade('Alpinópolis', 0)"><i class="fas fa-map-marker-alt"></i><span>Alpinópolis</span></div>
-          <div class="calc-opcao" onclick="escolherCidade('São João Batista do Glória', 30)"><i class="fas fa-map-marker-alt"></i><span>São João Batista do Glória</span></div>
-          <div class="calc-opcao" onclick="escolherCidade('São José da Barra', 30)"><i class="fas fa-map-marker-alt"></i><span>São José da Barra</span></div>
-          <div class="calc-opcao" onclick="escolherCidade('Itaú de Minas', 30)"><i class="fas fa-map-marker-alt"></i><span>Itaú de Minas</span></div>
-          <div class="calc-opcao" onclick="escolherCidade('São Sebastião do Paraíso', 110)"><i class="fas fa-map-marker-alt"></i><span>São Sebastião do Paraíso</span></div>
-          <div class="calc-opcao" onclick="escolherCidade('Capitólio', 120)"><i class="fas fa-map-marker-alt"></i><span>Capitólio</span></div>
-          <div class="calc-opcao" onclick="escolherCidade('Outra cidade', -1)"><i class="fas fa-question-circle"></i><span>Outra cidade</span></div>
-        </div>
-        <p class="calc-nota"><i class="fas fa-info-circle"></i> O deslocamento pode ser isento para serviços de maior porte — o valor será informado ao final.</p>
-        <button class="calc-voltar" onclick="voltarPasso(2)"><i class="fas fa-arrow-left"></i> Voltar</button>
-      </div>
-
-      <!-- RESULTADO -->
-      <div class="calc-step" id="passo-resultado">
-        <div class="calc-resultado-wrap" id="calc-resultado-content"></div>
-        <button class="calc-voltar" onclick="reiniciarCalc()"><i class="fas fa-redo"></i> Novo orçamento</button>
-      </div>
-
-    </div>
-  </div>
-</section>
   <div class="container">
     <div class="sobre-nos-content">
       <div class="sobre-nos-text">
@@ -594,7 +524,7 @@
 
 <!-- ORÇAMENTO FLUTUANTE -->
 <div class="orcamento-float">
-  <a href="#orcamento">
+  <a href="#contato">
     <i class="fas fa-tag"></i>
     <span>💰 Ver meu preço agora</span>
   </a>

@@ -451,7 +451,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function irParaPasso(id) {
-    document.querySelectorAll('.calc-step').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('#orcamento .calc-step').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
   }
 
@@ -461,7 +461,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   window.reiniciarCalc = function() {
     calcServico = null; calcModelo = null; calcCidade = ''; calcTaxa = 0;
-    document.querySelectorAll('.calc-opcao').forEach(o => o.classList.remove('selected'));
+    document.querySelectorAll('#orcamento .calc-opcao').forEach(o => o.classList.remove('selected'));
     irParaPasso('passo-1');
   };
 
