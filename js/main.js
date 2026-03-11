@@ -599,91 +599,138 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
 
-  // ============ AVALIAÇÕES GOOGLE ============
+  // ============ AVALIAÇÕES GOOGLE — CARROSSEL ============
   (function() {
-    const PLACE_ID = 'ChIJVeq4M8iPtpQRGY6wc-z2bf4';
-    const API_KEY  = 'AIzaSyBmxYzuixrzm90EaMJkvXI6JzBQN1cU4GE';
-
-    function estrelas(n) {
-      return '★'.repeat(n) + '☆'.repeat(5 - n);
-    }
-
-    function renderAvaliacoes(result) {
-      const nota = result.rating || 4.9;
-      const total = result.user_ratings_total || 0;
-      document.getElementById('google-nota').textContent = `${nota} ⭐ (${total} avaliações)`;
-
-      const reviews = (result.reviews || []).filter(r => r.text && r.text.length > 20).slice(0, 5);
-      if (!reviews.length) { usarFallback(); return; }
-
-      const track = document.getElementById('google-reviews-track');
-      track.innerHTML = reviews.map(r => {
-        const inicial = r.author_name ? r.author_name[0].toUpperCase() : '?';
-        const stars = estrelas(r.rating || 5);
-        const foto = r.profile_photo_url
-          ? `<img src="${r.profile_photo_url}" alt="${r.author_name}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;">`
-          : `<div class="depoimento-avatar">${inicial}</div>`;
-        return `
-          <div class="depoimento-card animate-on-scroll">
-            <span class="quote-icon">"</span>
-            <p class="depoimento-texto">${r.text}</p>
-            <div class="depoimento-autor">
-              ${foto}
-              <div class="depoimento-autor-info">
-                <h4>${r.author_name}</h4>
-                <div class="estrelas" style="color:var(--dourado)">${stars}</div>
-              </div>
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    function carregarAvaliacoes() {
-      const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${PLACE_ID}&fields=name,rating,reviews,user_ratings_total&language=pt-BR&key=${API_KEY}`;
-      const proxies = [
-        `https://corsproxy.io/?${encodeURIComponent(url)}`,
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
-      ];
-
-      function tentarProxy(i) {
-        if (i >= proxies.length) { usarFallback(); return; }
-        fetch(proxies[i])
-          .then(r => r.json())
-          .then(data => {
-            if (data.result) renderAvaliacoes(data.result);
-            else tentarProxy(i + 1);
-          })
-          .catch(() => tentarProxy(i + 1));
+    const reviews = [
+      {
+        author: 'Elaine Maria',
+        foto: 'https://lh3.googleusercontent.com/a-/ALV-UjUVXwgtYpMH7cAlYIj0pqfRzSLaTcOWuXAa_UzSXh1e9uTLTXAJ=s128-c0x00000000-cc-rp-mo',
+        texto: 'Minha experiência com essa empresa sempre ótima. Os serviços prestados são de ótima qualidade, profissionais responsáveis e o valor cobrado é um valor justo. Recomendo!',
+        nota: 5
+      },
+      {
+        author: 'Gisele de Medeiros Melo',
+        foto: 'https://lh3.googleusercontent.com/a-/ALV-UjWW5TR8fXqPRnPlwWnRWa9JdJ3qVwzYALBhQ-QhvRKxtj-UOziU=s128-c0x00000000-cc-rp-mo-ba3',
+        texto: 'Fui muito bem atendida!!! Meu sofá ficou como novo 😀.',
+        nota: 5
+      },
+      {
+        author: 'Strawberry',
+        foto: 'https://lh3.googleusercontent.com/a-/ALV-UjV-pWewvzk-qoMdORXSpBTn2mGUKeS4enysYiD11MDeHglcCyYb=s128-c0x00000000-cc-rp-mo',
+        texto: 'Atendimento incrível, além de oferecer ótimos serviços. Recomendo!',
+        nota: 5
+      },
+      {
+        author: 'Eu Ela e o Douglas',
+        foto: 'https://lh3.googleusercontent.com/a-/ALV-UjVpypCM0jCBJV-qq6b771Na1IUXHXHlQ7JSwVzokD_Y-zO9mRg=s128-c0x00000000-cc-rp-mo',
+        texto: 'Show! Equipe especializada. Fomos muito bem atendidos. Serviço de primeira!',
+        nota: 5
+      },
+      {
+        author: 'Ilydio Araújo Júnior',
+        foto: 'https://lh3.googleusercontent.com/a/ACg8ocKMDcsqhzK7Gw001JNFScRpP6DaVM4w158Rlou-xs5pJ1oWUQ=s128-c0x00000000-cc-rp-mo',
+        texto: 'Solicitei uma limpeza e higienização em um jogo de sofá ficou perfeito, recomendo 100%',
+        nota: 5
+      },
+      {
+        author: 'Ana Paula',
+        foto: null,
+        texto: 'Fiquei impressionada com o resultado da higienização do meu sofá. Parecia que eu tinha comprado um novo! A impermeabilização realmente funciona — meu filho derramou suco e foi só limpar com um pano, sem manchas.',
+        nota: 5
+      },
+      {
+        author: 'Carlos Eduardo',
+        foto: null,
+        texto: 'Meu colchão tinha manchas antigas que eu achava que não sairiam mais. A equipe da ClearMaster fez um trabalho incrível. Agora durmo muito melhor, principalmente porque tenho rinite alérgica.',
+        nota: 5
+      },
+      {
+        author: 'Mariana Silva',
+        foto: null,
+        texto: 'Contratei a impermeabilização para o sofá da sala. Depois de alguns meses, posso dizer que valeu cada centavo! As crianças já derramaram refrigerante várias vezes e nunca manchou. Recomendo demais!',
+        nota: 5
       }
-      tentarProxy(0);
-    }
+    ];
 
-    function usarFallback() {
-      document.getElementById('google-nota').textContent = '5.0 ⭐';
-      document.getElementById('google-reviews-track').innerHTML = `
-        <div class="depoimento-card animate-on-scroll">
+    document.getElementById('google-nota').textContent = '4.9 ⭐ (23 avaliações)';
+
+    function cardHTML(r) {
+      const stars = '★'.repeat(r.nota) + '☆'.repeat(5 - r.nota);
+      const foto = r.foto
+        ? `<img src="${r.foto}" alt="${r.author}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;">`
+        : `<div class="depoimento-avatar">${r.author[0].toUpperCase()}</div>`;
+      return `
+        <div class="depoimento-card">
           <span class="quote-icon">"</span>
-          <p class="depoimento-texto">Fiquei impressionada com o resultado! Meu sofá parecia novo. A impermeabilização realmente funciona — meu filho derramou suco e limpei com um pano, sem manchas.</p>
-          <div class="depoimento-autor"><div class="depoimento-avatar">A</div>
-            <div class="depoimento-autor-info"><h4>Ana Paula</h4><p>Passos - MG</p><div class="estrelas">★★★★★</div></div>
-          </div>
-        </div>
-        <div class="depoimento-card animate-on-scroll">
-          <span class="quote-icon">"</span>
-          <p class="depoimento-texto">Meu colchão tinha manchas antigas que eu achava que não sairiam. A ClearMaster fez um trabalho incrível. Durmo muito melhor agora!</p>
-          <div class="depoimento-autor"><div class="depoimento-avatar">C</div>
-            <div class="depoimento-autor-info"><h4>Carlos Eduardo</h4><p>São João Batista do Glória - MG</p><div class="estrelas">★★★★★</div></div>
-          </div>
-        </div>
-        <div class="depoimento-card animate-on-scroll">
-          <span class="quote-icon">"</span>
-          <p class="depoimento-texto">Impermeabilização valeu cada centavo! As crianças já derramaram refrigerante várias vezes e nunca manchou. Recomendo demais!</p>
-          <div class="depoimento-autor"><div class="depoimento-avatar">M</div>
-            <div class="depoimento-autor-info"><h4>Mariana Silva</h4><p>Alpinópolis - MG</p><div class="estrelas">★★★★★</div></div>
+          <p class="depoimento-texto">${r.texto}</p>
+          <div class="depoimento-autor">
+            ${foto}
+            <div class="depoimento-autor-info">
+              <h4>${r.author}</h4>
+              <div class="estrelas" style="color:var(--dourado)">${stars}</div>
+            </div>
           </div>
         </div>`;
     }
 
-    carregarAvaliacoes();
+    // Monta carrossel
+    const track = document.getElementById('google-reviews-track');
+    track.style.cssText = 'display:flex; gap:24px; transition: transform 0.7s cubic-bezier(.4,0,.2,1); will-change: transform;';
+
+    const wrapper = track.parentElement;
+    wrapper.style.cssText = 'overflow:hidden; position:relative;';
+
+    track.innerHTML = reviews.map(cardHTML).join('');
+
+    // Dots de navegação
+    const dotsWrap = document.createElement('div');
+    dotsWrap.style.cssText = 'display:flex;justify-content:center;gap:8px;margin-top:20px;';
+    wrapper.parentElement.insertBefore(dotsWrap, wrapper.nextSibling);
+
+    let atual = 0;
+    let visiveis = window.innerWidth < 768 ? 1 : window.innerWidth < 1100 ? 2 : 3;
+    const total = reviews.length;
+    const maxIndex = total - visiveis;
+
+    function atualizarDots() {
+      dotsWrap.innerHTML = '';
+      for (let i = 0; i <= maxIndex; i++) {
+        const d = document.createElement('div');
+        d.style.cssText = `width:${i===atual?'24px':'8px'};height:8px;border-radius:4px;background:${i===atual?'var(--dourado)':'rgba(201,168,76,0.3)'};transition:all 0.3s;cursor:pointer;`;
+        d.onclick = () => { atual = i; mover(); };
+        dotsWrap.appendChild(d);
+      }
+    }
+
+    function mover() {
+      if (atual > maxIndex) atual = 0;
+      if (atual < 0) atual = maxIndex;
+      const cardW = track.children[0] ? track.children[0].offsetWidth + 24 : 0;
+      track.style.transform = `translateX(-${atual * cardW}px)`;
+      atualizarDots();
+    }
+
+    // Botões prev/next
+    ['←','→'].forEach((txt, i) => {
+      const btn = document.createElement('button');
+      btn.textContent = txt;
+      btn.style.cssText = `position:absolute;top:50%;transform:translateY(-50%);${i===0?'left:-16px':'right:-16px'};z-index:10;width:36px;height:36px;border-radius:50%;background:var(--dourado);color:var(--azul-escuro);border:none;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,0.3);`;
+      btn.onclick = () => { atual += i === 0 ? -1 : 1; mover(); };
+      wrapper.style.position = 'relative';
+      wrapper.appendChild(btn);
+    });
+
+    atualizarDots();
+
+    // Auto-play a cada 4 segundos
+    let timer = setInterval(() => { atual++; mover(); }, 4000);
+    wrapper.addEventListener('mouseenter', () => clearInterval(timer));
+    wrapper.addEventListener('mouseleave', () => { timer = setInterval(() => { atual++; mover(); }, 4000); });
+
+    window.addEventListener('resize', () => {
+      visiveis = window.innerWidth < 768 ? 1 : window.innerWidth < 1100 ? 2 : 3;
+      atual = 0;
+      mover();
+    });
   })();
 
