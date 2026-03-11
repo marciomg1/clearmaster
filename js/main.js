@@ -601,8 +601,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // ============ AVALIAÇÕES GOOGLE ============
   (function() {
-    const PLACE_ID = 'ChIJVeq4M8iPtpQZjrBz7PZt_g';
-    const API_KEY  = 'AIzaSyB0RPhFD5P9KqrHmHjZZUqn2kSb_OeIQCk';
+    const PLACE_ID = 'ChIJVeq4M8iPtpQRGY6wc-z2bf4';
+    const API_KEY  = 'AIzaSyBmxYzuixrzm90EaMJkvXI6JzBQN1cU4GE';
 
     function estrelas(n) {
       return '★'.repeat(n) + '☆'.repeat(5 - n);
