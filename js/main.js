@@ -499,37 +499,12 @@ document.addEventListener('DOMContentLoaded', function () {
     cIrPasso('c-passo-2');
   };
 
-  // Cidade para impermeabilização/outros modelos — mesmo padrão do backup (this funciona pois onclick está no próprio div)
+  // Cidade para impermeabilização/outros modelos
   window.cCidadeFoto = function(cidade, taxa, el) {
     cCidade = cidade; cTaxa = taxa;
     document.querySelectorAll('#c-foto-cidades .calc-opcao').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
-    const content = document.getElementById('c-resultado-content');
-    const nomeServico = cServico === 'impermeabilizacao' ? 'Impermeabilização' : 'Higienização de Sofá (outros modelos)';
-    const taxaInfo = taxa === -1 ? 'consultar deslocamento' : taxa === 0 ? 'sem taxa de deslocamento' : `deslocamento R$ ${taxa},00`;
-    const msg = `Olá ClearMaster! 👋\n\nGostaria de um orçamento para:\n*Serviço:* ${nomeServico}\n*Cidade:* ${cidade} (${taxaInfo})\n\nVou enviar uma foto do estofado para avaliação! 📷`;
-    const titulo = cServico === 'impermeabilizacao'
-      ? 'Impermeabilização precisa de avaliação por foto'
-      : 'Outros modelos precisam de avaliação por foto';
-    const descricao = cServico === 'impermeabilizacao'
-      ? 'O valor varia conforme o tipo de tecido e tamanho.'
-      : 'O valor varia conforme o modelo e tamanho do sofá.';
-    const taxaHTML = taxa === -1
-      ? `<div class="calc-resultado-taxa"><i class="fas fa-map-marker-alt"></i> ${cidade} — deslocamento a consultar</div>`
-      : taxa === 0
-      ? `<div class="calc-resultado-taxa" style="color:#4ade80;border-color:rgba(74,222,128,0.3);background:rgba(74,222,128,0.07)"><i class="fas fa-check"></i> ${cidade} — sem taxa de deslocamento</div>`
-      : `<div class="calc-resultado-taxa"><i class="fas fa-car"></i> ${cidade} — deslocamento: R$ ${taxa},00</div>`;
-    content.innerHTML = `
-      <div class="calc-resultado-avaliacao">
-        <i class="fas fa-camera"></i>
-        <p><strong style="color:var(--texto-branco)">${titulo}</strong><br><br>
-        ${descricao} Envie uma foto e te passamos o orçamento rapidinho!</p>
-      </div>
-      ${taxaHTML}
-      <a href="https://wa.me/5535992469549?text=${encodeURIComponent(msg)}" target="_blank" class="btn btn-whatsapp" style="width:100%;justify-content:center;margin-top:16px;">
-        <i class="fab fa-whatsapp"></i> Enviar foto pelo WhatsApp
-      </a>`;
-    setTimeout(() => cIrPasso('c-passo-resultado'), 300);
+    setTimeout(() => cMostrarResultadoFoto(), 300);
   };
 
   const AGENDA_URL = 'https://script.google.com/macros/s/AKfycbzLhcwrJa-B6zORUTlYpKcV_v5hOR3m3zaZiH50kZkITPhjOsHuYB7PPGre9Y7enZfNnA/exec';
@@ -709,6 +684,25 @@ document.addEventListener('DOMContentLoaded', function () {
     if (cWppUrl) window.open(cWppUrl, '_blank');
   };
 
+  window.cWppDireto = function() {
+    let msg = '';
+    if (cServico === 'impermeabilizacao' || cModelo === -1) {
+      const nomeServico = cServico === 'impermeabilizacao' ? 'Impermeabilização' : `Higienização de ${cServico === 'sofa' ? 'Sofá' : 'Colchão'} (modelo não listado)`;
+      const taxaInfo = cTaxa === -1 ? 'Outra cidade (consultar deslocamento)' : cTaxa === 0 ? 'Sem taxa de deslocamento' : `Taxa de deslocamento: R$ ${cTaxa},00`;
+      msg = `Olá ClearMaster! 👋\n\nGostaria de agendar:\n*Serviço:* ${nomeServico}\n*Cidade:* ${cCidade}\n*${taxaInfo}*\n\nVou enviar uma foto do estofado para avaliação e combinar o horário! 📷`;
+    } else {
+      const item = precos[cServico][cModelo];
+      const preco = item.preco;
+      const total = cTaxa > 0 ? preco + cTaxa : preco;
+      const nomeServico = `Higienização de ${cServico === 'sofa' ? 'Sofá' : 'Colchão'}`;
+      msg = `Olá ClearMaster! 👋\n\nGostaria de agendar:\n*Serviço:* ${nomeServico}\n*Modelo:* ${item.label}\n*Valor estimado:* R$ ${preco},00\n`;
+      if (cTaxa > 0) msg += `*Deslocamento:* R$ ${cTaxa},00\n*Total estimado:* R$ ${total},00\n`;
+      else msg += `*Deslocamento:* Sem taxa\n`;
+      msg += `*Cidade:* ${cCidade}\n\n⚠️ _O valor será confirmado após envio de foto do estofado._\n\nPoderia me indicar um horário disponível?`;
+    }
+    window.open(`https://wa.me/5535992469549?text=${encodeURIComponent(msg)}`, '_blank');
+  };
+
   // Mostra resultado com valor e botão "Gostaria de agendar?"
   function cMostrarResultado() {
     const content = document.getElementById('c-resultado-content');
@@ -746,7 +740,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       <p style="font-size:0.82rem;color:var(--texto-muted);margin:8px 0 0;">⚠️ Valor estimado. Será confirmado após envio de foto do estofado pelo WhatsApp.</p>`;
 
-    btnAgendar.style.display = 'block';
+    btnAgendar.style.display = 'flex';
     cIrPasso('c-passo-resultado');
   }
 
@@ -770,7 +764,7 @@ document.addEventListener('DOMContentLoaded', function () {
       ${taxaHTML}
       <p style="font-size:0.82rem;color:var(--texto-muted);margin:8px 0 0;">⚠️ Valor será confirmado após envio de foto pelo WhatsApp.</p>`;
 
-    btnAgendar.style.display = 'block';
+    btnAgendar.style.display = 'flex';
     cIrPasso('c-passo-resultado');
   }
 

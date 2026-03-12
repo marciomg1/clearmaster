@@ -450,10 +450,13 @@
       <!-- RESULTADO -->
       <div class="calc-step" id="c-passo-resultado">
         <div class="calc-resultado-wrap" id="c-resultado-content"></div>
-        <!-- Botão agendar horário -->
-        <div id="c-btn-agendar-wrap" style="display:none; margin-top:12px;">
+        <!-- Botões de ação -->
+        <div id="c-btn-agendar-wrap" style="display:none; flex-direction:column; gap:10px; margin-top:12px;">
           <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="cAbrirAgenda()">
             <i class="fas fa-calendar-plus"></i> Gostaria de agendar um horário?
+          </button>
+          <button class="btn btn-whatsapp" style="width:100%;justify-content:center;" onclick="cWppDireto()">
+            <i class="fab fa-whatsapp"></i> Agendar diretamente pelo WhatsApp
           </button>
         </div>
         <button class="calc-voltar" onclick="cReiniciar()" style="margin-top:12px;"><i class="fas fa-redo"></i> Novo orçamento</button>
