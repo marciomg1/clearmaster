@@ -680,12 +680,17 @@ document.addEventListener('DOMContentLoaded', function () {
     return msg;
   }
 
+  let cWppUrl = '';
+
   function cMontarBotaoWpp(data, hora, acrescimo) {
     const msg = cMontarMsgWpp(data, hora, acrescimo);
-    const link = document.getElementById('c-agenda-wpp-link');
-    link.href = `https://wa.me/5535992469549?text=${encodeURIComponent(msg)}`;
+    cWppUrl = `https://wa.me/5535992469549?text=${encodeURIComponent(msg)}`;
     document.getElementById('c-agenda-wpp').style.display = 'block';
   }
+
+  window.cAbrirWppAgenda = function() {
+    if (cWppUrl) window.open(cWppUrl, '_blank');
+  };
 
   // Mostra resultado com valor e botão "Gostaria de agendar?"
   function cMostrarResultado() {
