@@ -647,63 +647,132 @@ document.addEventListener('DOMContentLoaded', function () {
       });
   };
 
-  function cMontarBotaoWpp(data, hora, acrescimo) {
+  function cMontarMsgWppFoto(data, hora, acrescimo) {
+    const nomeServico = cServico === 'impermeabilizacao' ? 'Impermeabilização' : `Higienização de ${cServico === 'sofa' ? 'Sofá' : 'Colchão'} (modelo não listado)`;
+    const taxaInfo = cTaxa === -1 ? 'Outra cidade (consultar deslocamento)' : cTaxa === 0 ? 'Sem taxa de deslocamento' : `Taxa de deslocamento: R$ ${cTaxa},00`;
+    const dataFormatada = new Date(`${data}T12:00:00`).toLocaleDateString('pt-BR');
+    let msg = `Olá ClearMaster! 👋\n\nGostaria de um orçamento para:\n`;
+    msg += `*Serviço:* ${nomeServico}\n`;
+    msg += `*Cidade:* ${cCidade}\n*${taxaInfo}*\n`;
+    if (acrescimo > 0) msg += `*Horário especial:* +R$ ${acrescimo},00\n`;
+    msg += `*Data:* ${dataFormatada}\n*Horário:* ${hora}\n\n`;
+    msg += `Vou enviar uma foto do estofado para avaliação! 📷`;
+    return msg;
+  }
+
+  function cMontarMsgWpp(data, hora, acrescimo) {
+    if (cModelo === -1 || cServico === 'impermeabilizacao') return cMontarMsgWppFoto(data, hora, acrescimo);
     const item = precos[cServico][cModelo];
     const preco = item.preco;
     const totalBase = cTaxa > 0 ? preco + cTaxa : preco;
     const totalFinal = totalBase + acrescimo;
     const dataFormatada = new Date(`${data}T12:00:00`).toLocaleDateString('pt-BR');
     const nomeServico = `Higienização de ${cServico === 'sofa' ? 'Sofá' : 'Colchão'}`;
-
     let msg = `Olá ClearMaster! 👋\n\nFiz o orçamento pelo site:\n\n`;
-    msg += `*Serviço:* ${nomeServico}\n`;
-    msg += `*Modelo:* ${item.label}\n`;
+    msg += `*Serviço:* ${nomeServico}\n*Modelo:* ${item.label}\n`;
     msg += `*Valor do serviço:* R$ ${preco},00\n`;
     if (cTaxa > 0) msg += `*Deslocamento:* R$ ${cTaxa},00\n`;
     else msg += `*Deslocamento:* Sem taxa\n`;
     if (acrescimo > 0) msg += `*Horário especial:* +R$ ${acrescimo},00\n`;
     msg += `*Total estimado:* R$ ${totalFinal},00\n`;
-    msg += `*Data:* ${dataFormatada}\n`;
-    msg += `*Horário:* ${hora}\n`;
-    msg += `*Cidade:* ${cCidade}\n\n`;
+    msg += `*Data:* ${dataFormatada}\n*Horário:* ${hora}\n*Cidade:* ${cCidade}\n\n`;
     msg += `⚠️ _O valor será confirmado após envio de foto do estofado._\n\nPoderia confirmar o agendamento?`;
+    return msg;
+  }
 
+  function cMontarBotaoWpp(data, hora, acrescimo) {
+    const msg = cMontarMsgWpp(data, hora, acrescimo);
     const link = document.getElementById('c-agenda-wpp-link');
     link.href = `https://wa.me/5535992469549?text=${encodeURIComponent(msg)}`;
     document.getElementById('c-agenda-wpp').style.display = 'block';
   }
 
-  window.cEscolherCidade = function(cidade, taxa, el) {
-    cCidade = cidade; cTaxa = taxa;
-    document.querySelectorAll('#c-passo3-cidades .calc-opcao').forEach(o => o.classList.remove('selected'));
-    el.classList.add('selected');
+  // Mostra resultado com valor e botão "Gostaria de agendar?"
+  function cMostrarResultado() {
+    const content = document.getElementById('c-resultado-content');
+    const btnAgendar = document.getElementById('c-btn-agendar-wrap');
 
-    // Cidade não listada → vai direto para resultado via WhatsApp
-    if (taxa === -1) {
-      setTimeout(() => {
-        const content = document.getElementById('c-resultado-content');
-        const msgWpp = `Olá ClearMaster! 👋\n\nGostaria de um orçamento:\n*Serviço:* Higienização de ${cServico === 'sofa' ? 'Sofá' : 'Colchão'}\n*Modelo:* ${precos[cServico][cModelo].label}\n*Cidade:* ${cCidade}\n\nPoderia me informar o valor do deslocamento?\n\n⚠️ _O valor será confirmado após envio de foto do estofado._`;
-        content.innerHTML = `
-          <div class="calc-resultado-avaliacao">
-            <i class="fas fa-map-marker-alt"></i>
-            <p><strong style="color:var(--texto-branco)">Cidade não listada</strong><br><br>
-            Para sua cidade o valor do deslocamento é calculado individualmente. Fale conosco!</p>
-          </div>
-          <a href="https://wa.me/5535992469549?text=${encodeURIComponent(msgWpp)}" target="_blank" class="btn btn-whatsapp" style="width:100%;justify-content:center;">
-            <i class="fab fa-whatsapp"></i> Consultar pelo WhatsApp
-          </a>`;
-        cIrPasso('c-passo-resultado');
-      }, 300);
+    if (cTaxa === -1) {
+      // Cidade não listada → só WhatsApp, sem agendamento
+      const msgWpp = `Olá ClearMaster! 👋\n\nGostaria de um orçamento:\n*Serviço:* Higienização de ${cServico === 'sofa' ? 'Sofá' : 'Colchão'}\n*Modelo:* ${precos[cServico][cModelo].label}\n*Cidade:* ${cCidade}\n\nPoderia me informar o valor do deslocamento?\n\n⚠️ _O valor será confirmado após envio de foto do estofado._`;
+      content.innerHTML = `
+        <div class="calc-resultado-avaliacao">
+          <i class="fas fa-map-marker-alt"></i>
+          <p><strong style="color:var(--texto-branco)">Cidade não listada</strong><br><br>
+          Para sua cidade o valor do deslocamento é calculado individualmente. Fale conosco!</p>
+        </div>
+        <a href="https://wa.me/5535992469549?text=${encodeURIComponent(msgWpp)}" target="_blank" class="btn btn-whatsapp" style="width:100%;justify-content:center;">
+          <i class="fab fa-whatsapp"></i> Consultar pelo WhatsApp
+        </a>`;
+      btnAgendar.style.display = 'none';
+      cIrPasso('c-passo-resultado');
       return;
     }
 
-    // Prepara o passo agenda com data mínima = hoje
+    const item = precos[cServico][cModelo];
+    const preco = item.preco;
+    const total = cTaxa > 0 ? preco + cTaxa : preco;
+
+    content.innerHTML = `
+      <div class="calc-resultado-servico">Higienização de ${cServico === 'sofa' ? 'Sofá' : 'Colchão'}</div>
+      <div class="calc-resultado-preco">R$ ${preco},00</div>
+      <div class="calc-resultado-detalhe">${item.label}</div>
+      <div class="calc-resultado-detalhe">📍 ${cCidade}</div>
+      ${cTaxa > 0
+        ? `<div class="calc-resultado-taxa"><i class="fas fa-car"></i> + R$ ${cTaxa},00 deslocamento → Total: R$ ${total},00</div>`
+        : `<div class="calc-resultado-taxa" style="color:#4ade80;border-color:rgba(74,222,128,0.3);background:rgba(74,222,128,0.07)"><i class="fas fa-check"></i> Sem taxa de deslocamento</div>`
+      }
+      <p style="font-size:0.82rem;color:var(--texto-muted);margin:8px 0 0;">⚠️ Valor estimado. Será confirmado após envio de foto do estofado pelo WhatsApp.</p>`;
+
+    btnAgendar.style.display = 'block';
+    cIrPasso('c-passo-resultado');
+  }
+
+  // Resultado para impermeabilização / outros modelos
+  function cMostrarResultadoFoto() {
+    const content = document.getElementById('c-resultado-content');
+    const btnAgendar = document.getElementById('c-btn-agendar-wrap');
+    const nomeServico = cServico === 'impermeabilizacao' ? 'Impermeabilização' : 'Higienização (modelo não listado)';
+    const taxaHTML = cTaxa === -1
+      ? `<div class="calc-resultado-taxa"><i class="fas fa-map-marker-alt"></i> ${cCidade} — deslocamento a consultar</div>`
+      : cTaxa === 0
+      ? `<div class="calc-resultado-taxa" style="color:#4ade80;border-color:rgba(74,222,128,0.3);background:rgba(74,222,128,0.07)"><i class="fas fa-check"></i> ${cCidade} — sem taxa de deslocamento</div>`
+      : `<div class="calc-resultado-taxa"><i class="fas fa-car"></i> ${cCidade} — deslocamento: R$ ${cTaxa},00</div>`;
+
+    content.innerHTML = `
+      <div class="calc-resultado-avaliacao">
+        <i class="fas fa-camera"></i>
+        <p><strong style="color:var(--texto-branco)">${nomeServico}</strong><br><br>
+        O valor varia conforme o tipo de tecido e tamanho. Envie uma foto e te passamos o orçamento rapidinho!</p>
+      </div>
+      ${taxaHTML}
+      <p style="font-size:0.82rem;color:var(--texto-muted);margin:8px 0 0;">⚠️ Valor será confirmado após envio de foto pelo WhatsApp.</p>`;
+
+    btnAgendar.style.display = 'block';
+    cIrPasso('c-passo-resultado');
+  }
+
+  // Abre tela de agendamento
+  window.cAbrirAgenda = function() {
     const hoje = new Date().toISOString().split('T')[0];
     document.getElementById('c-agenda-data').min = hoje;
     document.getElementById('c-agenda-data').value = '';
     document.getElementById('c-agenda-hora').innerHTML = '<option value="">Selecione</option>';
     cResetarVerificacao();
-    setTimeout(() => cIrPasso('c-passo-agenda'), 300);
+    cIrPasso('c-passo-agenda');
+  };
+
+  window.cEscolherCidade = function(cidade, taxa, el) {
+    cCidade = cidade; cTaxa = taxa;
+    document.querySelectorAll('#c-passo3-cidades .calc-opcao').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    setTimeout(() => cMostrarResultado(), 300);
+  };
+
+  // Cidade escolhida no fluxo de foto (impermeabilização/outros)
+  window.cSelecionarCidadeFoto = function(cidade, taxa) {
+    cCidade = cidade; cTaxa = taxa;
+    setTimeout(() => cMostrarResultadoFoto(), 300);
   };
 
   window.cReiniciar = function() {

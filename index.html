@@ -447,10 +447,22 @@
         <button class="calc-voltar" onclick="cIrPasso('c-passo-2')"><i class="fas fa-arrow-left"></i> Voltar</button>
       </div>
 
+      <!-- RESULTADO -->
+      <div class="calc-step" id="c-passo-resultado">
+        <div class="calc-resultado-wrap" id="c-resultado-content"></div>
+        <!-- Botão agendar horário -->
+        <div id="c-btn-agendar-wrap" style="display:none; margin-top:12px;">
+          <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="cAbrirAgenda()">
+            <i class="fas fa-calendar-plus"></i> Gostaria de agendar um horário?
+          </button>
+        </div>
+        <button class="calc-voltar" onclick="cReiniciar()" style="margin-top:12px;"><i class="fas fa-redo"></i> Novo orçamento</button>
+      </div>
+
       <!-- PASSO AGENDAMENTO -->
       <div class="calc-step" id="c-passo-agenda">
         <div class="calc-step-header">
-          <div class="calc-step-number">4</div>
+          <div class="calc-step-number" id="c-agenda-numero">4</div>
           <h3>Escolha data e horário</h3>
         </div>
         <p style="color:var(--texto-claro);font-size:0.9rem;margin-bottom:20px;text-align:center;">
@@ -466,10 +478,6 @@
             <label style="display:block;color:var(--texto-claro);font-size:0.85rem;margin-bottom:6px;">🕐 Horário</label>
             <select id="c-agenda-hora" style="width:100%;padding:12px;border-radius:10px;border:1px solid rgba(201,168,76,0.3);background:#1a2035;color:var(--texto-branco);font-size:0.95rem;" onchange="cResetarVerificacao()">
               <option value="">Selecione</option>
-              <option>07:00</option><option>08:00</option><option>09:00</option>
-              <option>10:00</option><option>11:00</option><option>12:00</option>
-              <option>13:00</option><option>14:00</option><option>15:00</option>
-              <option>16:00</option><option>17:00</option>
             </select>
           </div>
         </div>
@@ -482,13 +490,7 @@
             <i class="fab fa-whatsapp"></i> Confirmar pelo WhatsApp
           </a>
         </div>
-        <button class="calc-voltar" onclick="cIrPasso('c-passo-3')"><i class="fas fa-arrow-left"></i> Voltar</button>
-      </div>
-
-      <!-- RESULTADO -->
-      <div class="calc-step" id="c-passo-resultado">
-        <div class="calc-resultado-wrap" id="c-resultado-content"></div>
-        <button class="calc-voltar" onclick="cReiniciar()"><i class="fas fa-redo"></i> Novo orçamento</button>
+        <button class="calc-voltar" onclick="cIrPasso('c-passo-resultado')"><i class="fas fa-arrow-left"></i> Voltar</button>
       </div>
 
     </div>
