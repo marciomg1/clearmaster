@@ -477,9 +477,6 @@ document.addEventListener('DOMContentLoaded', function () {
   window.cEscolherServico = function(servico) {
     cServico = servico;
     if (servico === 'impermeabilizacao') {
-      document.getElementById('c-foto-titulo').textContent = 'Impermeabilização — informe sua cidade e envie uma foto';
-      document.getElementById('c-foto-upload-area').style.display = 'none';
-      document.querySelectorAll('#c-foto-cidades .calc-opcao').forEach(o => o.classList.remove('selected'));
       cIrPasso('c-passo-foto');
       return;
     }
@@ -494,19 +491,45 @@ document.addEventListener('DOMContentLoaded', function () {
       div.onclick = () => { cModelo = i; cIrPasso('c-passo-3'); };
       opcoes.appendChild(div);
     });
-    // Outros modelos
     const outro = document.createElement('div');
     outro.className = 'calc-opcao';
     outro.innerHTML = `<i class="fas fa-question-circle"></i><span>Outros modelos</span>`;
-    outro.onclick = () => {
-      cModelo = -1;
-      document.getElementById('c-foto-titulo').textContent = 'Outros modelos — informe sua cidade e envie uma foto';
-      document.getElementById('c-foto-upload-area').style.display = 'none';
-      document.querySelectorAll('#c-foto-cidades .calc-opcao').forEach(o => o.classList.remove('selected'));
-      cIrPasso('c-passo-foto');
-    };
+    outro.onclick = () => { cModelo = -1; cIrPasso('c-passo-foto'); };
     opcoes.appendChild(outro);
     cIrPasso('c-passo-2');
+  };
+
+  // Cidade para impermeabilização/outros modelos — mesmo padrão do backup (this funciona pois onclick está no próprio div)
+  window.cCidadeFoto = function(cidade, taxa, el) {
+    cCidade = cidade; cTaxa = taxa;
+    document.querySelectorAll('#c-foto-cidades .calc-opcao').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    const content = document.getElementById('c-resultado-content');
+    const nomeServico = cServico === 'impermeabilizacao' ? 'Impermeabilização' : 'Higienização de Sofá (outros modelos)';
+    const taxaInfo = taxa === -1 ? 'consultar deslocamento' : taxa === 0 ? 'sem taxa de deslocamento' : `deslocamento R$ ${taxa},00`;
+    const msg = `Olá ClearMaster! 👋\n\nGostaria de um orçamento para:\n*Serviço:* ${nomeServico}\n*Cidade:* ${cidade} (${taxaInfo})\n\nVou enviar uma foto do estofado para avaliação! 📷`;
+    const titulo = cServico === 'impermeabilizacao'
+      ? 'Impermeabilização precisa de avaliação por foto'
+      : 'Outros modelos precisam de avaliação por foto';
+    const descricao = cServico === 'impermeabilizacao'
+      ? 'O valor varia conforme o tipo de tecido e tamanho.'
+      : 'O valor varia conforme o modelo e tamanho do sofá.';
+    const taxaHTML = taxa === -1
+      ? `<div class="calc-resultado-taxa"><i class="fas fa-map-marker-alt"></i> ${cidade} — deslocamento a consultar</div>`
+      : taxa === 0
+      ? `<div class="calc-resultado-taxa" style="color:#4ade80;border-color:rgba(74,222,128,0.3);background:rgba(74,222,128,0.07)"><i class="fas fa-check"></i> ${cidade} — sem taxa de deslocamento</div>`
+      : `<div class="calc-resultado-taxa"><i class="fas fa-car"></i> ${cidade} — deslocamento: R$ ${taxa},00</div>`;
+    content.innerHTML = `
+      <div class="calc-resultado-avaliacao">
+        <i class="fas fa-camera"></i>
+        <p><strong style="color:var(--texto-branco)">${titulo}</strong><br><br>
+        ${descricao} Envie uma foto e te passamos o orçamento rapidinho!</p>
+      </div>
+      ${taxaHTML}
+      <a href="https://wa.me/5535992469549?text=${encodeURIComponent(msg)}" target="_blank" class="btn btn-whatsapp" style="width:100%;justify-content:center;margin-top:16px;">
+        <i class="fab fa-whatsapp"></i> Enviar foto pelo WhatsApp
+      </a>`;
+    setTimeout(() => cIrPasso('c-passo-resultado'), 300);
   };
 
   window.cEscolherCidade = function(cidade, taxa, el) {
@@ -560,38 +583,6 @@ document.addEventListener('DOMContentLoaded', function () {
     cIrPasso('c-passo-resultado');
   }
 
-  window.cSelecionarCidadeFoto = function(cidade, taxa, el) {
-    cCidade = cidade; cTaxa = taxa;
-    document.querySelectorAll('#c-foto-cidades .calc-opcao').forEach(o => o.classList.remove('selected'));
-    el.classList.add('selected');
-    document.getElementById('c-foto-upload-area').style.display = 'block';
-  };
-
-  window.cFotoSelecionada = function(input) {
-    const nome = input.files[0] ? input.files[0].name : 'Clique para escolher uma foto';
-    document.getElementById('c-foto-nome').textContent = nome;
-  };
-
-  window.cEnviarFotoWhatsApp = function() {
-    const nomeServico = cServico === 'impermeabilizacao' ? 'Impermeabilização' : `Higienização de ${cServico === 'sofa' ? 'Sofá' : 'Colchão'} (modelo não listado)`;
-    const taxaInfo = cTaxa === -1 ? 'Outra cidade (consultar deslocamento)' : cTaxa === 0 ? 'Sem taxa de deslocamento' : `Deslocamento: R$ ${cTaxa},00`;
-    const msg = `Olá ClearMaster! 👋\n\nGostaria de um orçamento para:\n*Serviço:* ${nomeServico}\n*Cidade:* ${cCidade}\n*${taxaInfo}*\n\nVou enviar uma foto para avaliação!`;
-    const input = document.getElementById('c-input-foto');
-
-    if (input.files[0]) {
-      // Abre WhatsApp e instrui a anexar a foto
-      const wppUrl = `https://wa.me/5535992469549?text=${encodeURIComponent(msg + '\n\n📎 *Foto em anexo*')}`;
-      window.open(wppUrl, '_blank');
-      // Tenta compartilhar a foto via Web Share API (funciona no celular)
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [input.files[0]] })) {
-        navigator.share({ files: [input.files[0]], title: 'Foto para orçamento ClearMaster' });
-      }
-    } else {
-      const wppUrl = `https://wa.me/5535992469549?text=${encodeURIComponent(msg)}`;
-      window.open(wppUrl, '_blank');
-    }
-  };
-
   window.cReiniciar = function() {
     cServico = null; cModelo = null; cCidade = ''; cTaxa = 0;
     document.querySelectorAll('#contato .calc-opcao').forEach(o => o.classList.remove('selected'));
@@ -606,12 +597,6 @@ document.addEventListener('DOMContentLoaded', function () {
         author: 'Elaine Maria',
         foto: 'https://lh3.googleusercontent.com/a-/ALV-UjUVXwgtYpMH7cAlYIj0pqfRzSLaTcOWuXAa_UzSXh1e9uTLTXAJ=s128-c0x00000000-cc-rp-mo',
         texto: 'Minha experiência com essa empresa sempre ótima. Os serviços prestados são de ótima qualidade, profissionais responsáveis e o valor cobrado é um valor justo. Recomendo!',
-        nota: 5
-      },
-      {
-        author: 'Gisele de Medeiros Melo',
-        foto: 'https://lh3.googleusercontent.com/a-/ALV-UjWW5TR8fXqPRnPlwWnRWa9JdJ3qVwzYALBhQ-QhvRKxtj-UOziU=s128-c0x00000000-cc-rp-mo-ba3',
-        texto: 'Fui muito bem atendida!!! Meu sofá ficou como novo 😀.',
         nota: 5
       },
       {

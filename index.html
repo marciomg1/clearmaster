@@ -398,36 +398,22 @@
         </div>
       </div>
 
-      <!-- PASSO FOTO (impermeabilização e outros modelos) -->
+      <!-- PASSO FOTO — cidade para imper/outros -->
       <div class="calc-step" id="c-passo-foto">
         <div class="calc-step-header">
           <div class="calc-step-number">2</div>
-          <h3 id="c-foto-titulo">Informe sua cidade e envie uma foto</h3>
+          <h3>Qual sua cidade?</h3>
         </div>
-
         <div class="calc-opcoes" id="c-foto-cidades">
-          <div class="calc-opcao" onclick="cSelecionarCidadeFoto('Passos', 0, this)"><i class="fas fa-map-marker-alt"></i><span>Passos</span></div>
-          <div class="calc-opcao" onclick="cSelecionarCidadeFoto('Alpinópolis', 0, this)"><i class="fas fa-map-marker-alt"></i><span>Alpinópolis</span></div>
-          <div class="calc-opcao" onclick="cSelecionarCidadeFoto('São João Batista do Glória', 30, this)"><i class="fas fa-map-marker-alt"></i><span>São João Batista do Glória</span></div>
-          <div class="calc-opcao" onclick="cSelecionarCidadeFoto('São José da Barra', 30, this)"><i class="fas fa-map-marker-alt"></i><span>São José da Barra</span></div>
-          <div class="calc-opcao" onclick="cSelecionarCidadeFoto('Itaú de Minas', 30, this)"><i class="fas fa-map-marker-alt"></i><span>Itaú de Minas</span></div>
-          <div class="calc-opcao" onclick="cSelecionarCidadeFoto('São Sebastião do Paraíso', 110, this)"><i class="fas fa-map-marker-alt"></i><span>São Sebastião do Paraíso</span></div>
-          <div class="calc-opcao" onclick="cSelecionarCidadeFoto('Capitólio', 120, this)"><i class="fas fa-map-marker-alt"></i><span>Capitólio</span></div>
-          <div class="calc-opcao" onclick="cSelecionarCidadeFoto('Outra cidade', -1, this)"><i class="fas fa-question-circle"></i><span>Outra cidade</span></div>
+          <div class="calc-opcao" onclick="cCidadeFoto('Passos',0,this)"><i class="fas fa-map-marker-alt"></i><span>Passos</span></div>
+          <div class="calc-opcao" onclick="cCidadeFoto('Alpinópolis',0,this)"><i class="fas fa-map-marker-alt"></i><span>Alpinópolis</span></div>
+          <div class="calc-opcao" onclick="cCidadeFoto('São João Batista do Glória',30,this)"><i class="fas fa-map-marker-alt"></i><span>São João Batista do Glória</span></div>
+          <div class="calc-opcao" onclick="cCidadeFoto('São José da Barra',30,this)"><i class="fas fa-map-marker-alt"></i><span>São José da Barra</span></div>
+          <div class="calc-opcao" onclick="cCidadeFoto('Itaú de Minas',30,this)"><i class="fas fa-map-marker-alt"></i><span>Itaú de Minas</span></div>
+          <div class="calc-opcao" onclick="cCidadeFoto('São Sebastião do Paraíso',110,this)"><i class="fas fa-map-marker-alt"></i><span>São Sebastião do Paraíso</span></div>
+          <div class="calc-opcao" onclick="cCidadeFoto('Capitólio',120,this)"><i class="fas fa-map-marker-alt"></i><span>Capitólio</span></div>
+          <div class="calc-opcao" onclick="cCidadeFoto('Outra cidade',-1,this)"><i class="fas fa-question-circle"></i><span>Outra cidade</span></div>
         </div>
-
-        <div class="calc-foto-upload" id="c-foto-upload-area" style="display:none; margin-top:24px;">
-          <p class="calc-nota"><i class="fas fa-camera"></i> Anexe uma foto para agilizar o orçamento (opcional)</p>
-          <label class="calc-foto-label" for="c-input-foto">
-            <i class="fas fa-image"></i>
-            <span id="c-foto-nome">Clique para escolher uma foto</span>
-          </label>
-          <input type="file" id="c-input-foto" accept="image/*" style="display:none" onchange="cFotoSelecionada(this)">
-          <button class="btn btn-whatsapp" style="width:100%;justify-content:center;margin-top:16px;" onclick="cEnviarFotoWhatsApp()">
-            <i class="fab fa-whatsapp"></i> Enviar pelo WhatsApp
-          </button>
-        </div>
-
         <button class="calc-voltar" onclick="cIrPasso('c-passo-1')" style="margin-top:20px;"><i class="fas fa-arrow-left"></i> Voltar</button>
       </div>
 
