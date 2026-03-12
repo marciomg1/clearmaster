@@ -447,6 +447,44 @@
         <button class="calc-voltar" onclick="cIrPasso('c-passo-2')"><i class="fas fa-arrow-left"></i> Voltar</button>
       </div>
 
+      <!-- PASSO AGENDAMENTO -->
+      <div class="calc-step" id="c-passo-agenda">
+        <div class="calc-step-header">
+          <div class="calc-step-number">4</div>
+          <h3>Escolha data e horário</h3>
+        </div>
+        <p style="color:var(--texto-claro);font-size:0.9rem;margin-bottom:20px;text-align:center;">
+          <i class="fas fa-calendar-check" style="color:var(--dourado);margin-right:6px;"></i>
+          Verifique se o horário está disponível antes de enviar pelo WhatsApp
+        </p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div>
+            <label style="display:block;color:var(--texto-claro);font-size:0.85rem;margin-bottom:6px;">📅 Data</label>
+            <input type="date" id="c-agenda-data" style="width:100%;padding:12px;border-radius:10px;border:1px solid rgba(201,168,76,0.3);background:rgba(255,255,255,0.05);color:var(--texto-branco);font-size:0.95rem;" onchange="cAtualizarHorarios()">
+          </div>
+          <div>
+            <label style="display:block;color:var(--texto-claro);font-size:0.85rem;margin-bottom:6px;">🕐 Horário</label>
+            <select id="c-agenda-hora" style="width:100%;padding:12px;border-radius:10px;border:1px solid rgba(201,168,76,0.3);background:#1a2035;color:var(--texto-branco);font-size:0.95rem;" onchange="cResetarVerificacao()">
+              <option value="">Selecione</option>
+              <option>07:00</option><option>08:00</option><option>09:00</option>
+              <option>10:00</option><option>11:00</option><option>12:00</option>
+              <option>13:00</option><option>14:00</option><option>15:00</option>
+              <option>16:00</option><option>17:00</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:12px;" onclick="cVerificarAgenda()">
+          <i class="fas fa-search"></i> Verificar disponibilidade
+        </button>
+        <div id="c-agenda-status" style="display:none;padding:14px;border-radius:10px;text-align:center;margin-bottom:12px;font-size:0.95rem;"></div>
+        <div id="c-agenda-wpp" style="display:none;">
+          <a id="c-agenda-wpp-link" href="#" target="_blank" class="btn btn-whatsapp" style="width:100%;justify-content:center;">
+            <i class="fab fa-whatsapp"></i> Confirmar pelo WhatsApp
+          </a>
+        </div>
+        <button class="calc-voltar" onclick="cIrPasso('c-passo-3')"><i class="fas fa-arrow-left"></i> Voltar</button>
+      </div>
+
       <!-- RESULTADO -->
       <div class="calc-step" id="c-passo-resultado">
         <div class="calc-resultado-wrap" id="c-resultado-content"></div>

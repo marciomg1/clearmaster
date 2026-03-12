@@ -532,56 +532,179 @@ document.addEventListener('DOMContentLoaded', function () {
     setTimeout(() => cIrPasso('c-passo-resultado'), 300);
   };
 
+  const AGENDA_URL = 'https://script.google.com/macros/s/AKfycbzLhcwrJa-B6zORUTlYpKcV_v5hOR3m3zaZiH50kZkITPhjOsHuYB7PPGre9Y7enZfNnA/exec';
+  const ACRESCIMO_ESPECIAL = 60;
+
+  // Retorna true se o horário selecionado é especial (+R$60)
+  function cEhHorarioEspecial(dateStr, timeStr) {
+    const d = new Date(`${dateStr}T${timeStr}:00`);
+    const diaSemana = d.getDay(); // 0=dom, 6=sab
+    const hora = parseInt(timeStr.split(':')[0]);
+    if (diaSemana === 0) return true;                        // domingo sempre especial
+    if (diaSemana === 6 && hora >= 14) return true;          // sáb 14h+
+    if (diaSemana >= 1 && diaSemana <= 5 && hora >= 18) return true; // seg-sex 18h+
+    return false;
+  }
+
+  // Popula o select de horários conforme o dia escolhido
+  window.cAtualizarHorarios = function() {
+    const dataInput = document.getElementById('c-agenda-data');
+    const horaSelect = document.getElementById('c-agenda-hora');
+    const dateStr = dataInput.value;
+    horaSelect.innerHTML = '<option value="">Selecione</option>';
+    if (!dateStr) return;
+
+    const d = new Date(`${dateStr}T12:00:00`);
+    const diaSemana = d.getDay();
+
+    let horarios = [];
+    if (diaSemana === 0) {
+      // Domingo: 8h–14h especial
+      horarios = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00'];
+    } else if (diaSemana === 6) {
+      // Sábado: 7h–12h normal, 14h–16h especial
+      horarios = ['07:00','08:00','09:00','10:00','11:00','12:00','14:00','15:00','16:00'];
+    } else {
+      // Seg–Sex: 7h–17h normal, 18h–20h especial
+      horarios = ['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'];
+    }
+
+    horarios.forEach(h => {
+      const especial = cEhHorarioEspecial(dateStr, h);
+      const opt = document.createElement('option');
+      opt.value = h;
+      opt.textContent = especial ? `${h} ⭐ Horário especial (+R$ 60,00)` : h;
+      horaSelect.appendChild(opt);
+    });
+
+    cResetarVerificacao();
+  };
+
+  window.cResetarVerificacao = function() {
+    document.getElementById('c-agenda-status').style.display = 'none';
+    document.getElementById('c-agenda-wpp').style.display = 'none';
+  };
+
+  window.cVerificarAgenda = function() {
+    const data = document.getElementById('c-agenda-data').value;
+    const hora = document.getElementById('c-agenda-hora').value;
+    const status = document.getElementById('c-agenda-status');
+
+    if (!data || !hora) {
+      status.style.display = 'block';
+      status.style.background = 'rgba(239,68,68,0.1)';
+      status.style.border = '1px solid rgba(239,68,68,0.3)';
+      status.style.color = '#f87171';
+      status.innerHTML = '⚠️ Selecione a data e o horário primeiro.';
+      return;
+    }
+
+    // Bloquear datas passadas
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const escolhida = new Date(`${data}T12:00:00`);
+    if (escolhida < hoje) {
+      status.style.display = 'block';
+      status.style.background = 'rgba(239,68,68,0.1)';
+      status.style.border = '1px solid rgba(239,68,68,0.3)';
+      status.style.color = '#f87171';
+      status.innerHTML = '❌ Data inválida. Escolha uma data futura.';
+      return;
+    }
+
+    status.style.display = 'block';
+    status.style.background = 'rgba(201,168,76,0.08)';
+    status.style.border = '1px solid rgba(201,168,76,0.2)';
+    status.style.color = 'var(--dourado)';
+    status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando disponibilidade...';
+    document.getElementById('c-agenda-wpp').style.display = 'none';
+
+    fetch(`${AGENDA_URL}?date=${data}&time=${hora}`)
+      .then(r => r.json())
+      .then(json => {
+        const especial = cEhHorarioEspecial(data, hora);
+        const acrescimo = especial ? ACRESCIMO_ESPECIAL : 0;
+
+        if (json.disponivel) {
+          status.style.background = 'rgba(74,222,128,0.08)';
+          status.style.border = '1px solid rgba(74,222,128,0.3)';
+          status.style.color = '#4ade80';
+          const dataFormatada = new Date(`${data}T12:00:00`).toLocaleDateString('pt-BR');
+          status.innerHTML = `✅ Horário disponível! ${dataFormatada} às ${hora}${especial ? ' — <strong>Horário especial (+R$ 60,00)</strong>' : ''}`;
+          cMontarBotaoWpp(data, hora, acrescimo);
+        } else {
+          status.style.background = 'rgba(239,68,68,0.1)';
+          status.style.border = '1px solid rgba(239,68,68,0.3)';
+          status.style.color = '#f87171';
+          status.innerHTML = '❌ Horário indisponível. Por favor, escolha outro horário ou data.';
+          document.getElementById('c-agenda-wpp').style.display = 'none';
+        }
+      })
+      .catch(() => {
+        status.style.background = 'rgba(239,68,68,0.1)';
+        status.style.border = '1px solid rgba(239,68,68,0.3)';
+        status.style.color = '#f87171';
+        status.innerHTML = '⚠️ Erro ao verificar. Tente novamente ou entre em contato pelo WhatsApp.';
+      });
+  };
+
+  function cMontarBotaoWpp(data, hora, acrescimo) {
+    const item = precos[cServico][cModelo];
+    const preco = item.preco;
+    const totalBase = cTaxa > 0 ? preco + cTaxa : preco;
+    const totalFinal = totalBase + acrescimo;
+    const dataFormatada = new Date(`${data}T12:00:00`).toLocaleDateString('pt-BR');
+    const nomeServico = `Higienização de ${cServico === 'sofa' ? 'Sofá' : 'Colchão'}`;
+
+    let msg = `Olá ClearMaster! 👋\n\nFiz o orçamento pelo site:\n\n`;
+    msg += `*Serviço:* ${nomeServico}\n`;
+    msg += `*Modelo:* ${item.label}\n`;
+    msg += `*Valor do serviço:* R$ ${preco},00\n`;
+    if (cTaxa > 0) msg += `*Deslocamento:* R$ ${cTaxa},00\n`;
+    else msg += `*Deslocamento:* Sem taxa\n`;
+    if (acrescimo > 0) msg += `*Horário especial:* +R$ ${acrescimo},00\n`;
+    msg += `*Total estimado:* R$ ${totalFinal},00\n`;
+    msg += `*Data:* ${dataFormatada}\n`;
+    msg += `*Horário:* ${hora}\n`;
+    msg += `*Cidade:* ${cCidade}\n\n`;
+    msg += `⚠️ _O valor será confirmado após envio de foto do estofado._\n\nPoderia confirmar o agendamento?`;
+
+    const link = document.getElementById('c-agenda-wpp-link');
+    link.href = `https://wa.me/5535992469549?text=${encodeURIComponent(msg)}`;
+    document.getElementById('c-agenda-wpp').style.display = 'block';
+  }
+
   window.cEscolherCidade = function(cidade, taxa, el) {
     cCidade = cidade; cTaxa = taxa;
     document.querySelectorAll('#c-passo3-cidades .calc-opcao').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
-    setTimeout(() => cMostrarResultado(), 300);
-  };
 
-  function cMostrarResultado() {
-    const content = document.getElementById('c-resultado-content');
-
-    if (cTaxa === -1) {
-      const msgWpp = `Olá ClearMaster! 👋\n\nGostaria de um orçamento:\n*Serviço:* Higienização de ${cServico === 'sofa' ? 'Sofá' : 'Colchão'}\n*Modelo:* ${precos[cServico][cModelo].label}\n*Cidade:* ${cCidade}\n\nPoderia me informar o valor do deslocamento?`;
-      content.innerHTML = `
-        <div class="calc-resultado-avaliacao">
-          <i class="fas fa-map-marker-alt"></i>
-          <p><strong style="color:var(--texto-branco)">Cidade não listada</strong><br><br>
-          Para sua cidade o valor do deslocamento é calculado individualmente. Fale conosco!</p>
-        </div>
-        <a href="https://wa.me/5535992469549?text=${encodeURIComponent(msgWpp)}" target="_blank" class="btn btn-whatsapp" style="width:100%;justify-content:center;">
-          <i class="fab fa-whatsapp"></i> Consultar pelo WhatsApp
-        </a>`;
-      cIrPasso('c-passo-resultado');
+    // Cidade não listada → vai direto para resultado via WhatsApp
+    if (taxa === -1) {
+      setTimeout(() => {
+        const content = document.getElementById('c-resultado-content');
+        const msgWpp = `Olá ClearMaster! 👋\n\nGostaria de um orçamento:\n*Serviço:* Higienização de ${cServico === 'sofa' ? 'Sofá' : 'Colchão'}\n*Modelo:* ${precos[cServico][cModelo].label}\n*Cidade:* ${cCidade}\n\nPoderia me informar o valor do deslocamento?\n\n⚠️ _O valor será confirmado após envio de foto do estofado._`;
+        content.innerHTML = `
+          <div class="calc-resultado-avaliacao">
+            <i class="fas fa-map-marker-alt"></i>
+            <p><strong style="color:var(--texto-branco)">Cidade não listada</strong><br><br>
+            Para sua cidade o valor do deslocamento é calculado individualmente. Fale conosco!</p>
+          </div>
+          <a href="https://wa.me/5535992469549?text=${encodeURIComponent(msgWpp)}" target="_blank" class="btn btn-whatsapp" style="width:100%;justify-content:center;">
+            <i class="fab fa-whatsapp"></i> Consultar pelo WhatsApp
+          </a>`;
+        cIrPasso('c-passo-resultado');
+      }, 300);
       return;
     }
 
-    const item = precos[cServico][cModelo];
-    const preco = item.preco;
-    const total = cTaxa > 0 ? preco + cTaxa : preco;
-    const msgWpp =
-      `Olá ClearMaster! 👋\n\nFiz o orçamento pelo site:\n\n` +
-      `*Serviço:* Higienização de ${cServico === 'sofa' ? 'Sofá' : 'Colchão'}\n` +
-      `*Modelo:* ${item.label}\n*Valor:* R$ ${preco},00\n*Cidade:* ${cCidade}\n` +
-      (cTaxa > 0 ? `*Deslocamento:* R$ ${cTaxa},00\n*Total estimado:* R$ ${total},00\n` : `*Deslocamento:* Sem taxa\n`) +
-      `\nPoderia confirmar o agendamento?`;
-
-    content.innerHTML = `
-      <div class="calc-resultado-servico">Higienização de ${cServico === 'sofa' ? 'Sofá' : 'Colchão'}</div>
-      <div class="calc-resultado-preco">R$ ${preco},00</div>
-      <div class="calc-resultado-detalhe">${item.label}</div>
-      <div class="calc-resultado-detalhe">📍 ${cCidade}</div>
-      ${cTaxa > 0
-        ? `<div class="calc-resultado-taxa"><i class="fas fa-car"></i> + R$ ${cTaxa},00 deslocamento → Total: R$ ${total},00</div>`
-        : `<div class="calc-resultado-taxa" style="color:#4ade80;border-color:rgba(74,222,128,0.3);background:rgba(74,222,128,0.07)"><i class="fas fa-check"></i> Sem taxa de deslocamento</div>`
-      }
-      <p style="font-size:0.82rem;color:var(--texto-muted);margin:0 0 16px;">⚠️ Valor estimado. Confirme pelo WhatsApp.</p>
-      <a href="https://wa.me/5535992469549?text=${encodeURIComponent(msgWpp)}" target="_blank" class="btn btn-whatsapp" style="width:100%;justify-content:center;">
-        <i class="fab fa-whatsapp"></i> Confirmar pelo WhatsApp
-      </a>`;
-    cIrPasso('c-passo-resultado');
-  }
+    // Prepara o passo agenda com data mínima = hoje
+    const hoje = new Date().toISOString().split('T')[0];
+    document.getElementById('c-agenda-data').min = hoje;
+    document.getElementById('c-agenda-data').value = '';
+    document.getElementById('c-agenda-hora').innerHTML = '<option value="">Selecione</option>';
+    cResetarVerificacao();
+    setTimeout(() => cIrPasso('c-passo-agenda'), 300);
+  };
 
   window.cReiniciar = function() {
     cServico = null; cModelo = null; cCidade = ''; cTaxa = 0;
