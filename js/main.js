@@ -536,40 +536,89 @@ document.addEventListener('DOMContentLoaded', function () {
     return horarios;
   }
 
-  // Popula o select de horários conforme o dia escolhido
-  window.cAtualizarHorarios = function() {
-    const dataInput = document.getElementById('c-agenda-data');
-    const horaSelect = document.getElementById('c-agenda-hora');
-    const dateStr = dataInput.value;
-    horaSelect.innerHTML = '<option value="">Selecione</option>';
-    if (!dateStr) return;
-
+  // Lista horários disponíveis para o dia (sem consultar agenda)
+  function cListarHorariosDia(dateStr) {
     const d = new Date(`${dateStr}T12:00:00`);
     const diaSemana = d.getDay();
+    if (diaSemana === 0) return cGerarHorarios(8, 0, 14, 0);
+    if (diaSemana === 6) return [...cGerarHorarios(7, 0, 13, 0), ...cGerarHorarios(14, 0, 17, 0)];
+    return [...cGerarHorarios(7, 0, 18, 0), ...cGerarHorarios(18, 0, 21, 0)];
+  }
 
-    let horarios = [];
-    if (diaSemana === 0) {
-      // Domingo especial: 8h–14h → último às 13:00 (13+1h=14h)
-      horarios = cGerarHorarios(8, 0, 14, 0);
-    } else if (diaSemana === 6) {
-      // Sábado normal: 7h–13h → último às 12:00 (12+1h=13h, dentro do expediente até 13h)
-      // Sábado especial: 14h–17h → último às 16:00 (16+1h=17h)
-      horarios = [...cGerarHorarios(7, 0, 13, 0), ...cGerarHorarios(14, 0, 17, 0)];
-    } else {
-      // Seg–Sex normal: 7h–18h → último às 17:00 (17+1h=18h)
-      // Seg–Sex especial: 18h–21h → último às 20:00 (20+1h=21h)
-      horarios = [...cGerarHorarios(7, 0, 18, 0), ...cGerarHorarios(18, 0, 21, 0)];
-    }
+  // mantido por compatibilidade com onchange antigo
+  window.cAtualizarHorarios = window.cCarregarHorariosDisponiveis;
 
-    horarios.forEach(h => {
-      const especial = cEhHorarioEspecial(dateStr, h);
-      const opt = document.createElement('option');
-      opt.value = h;
-      opt.textContent = especial ? `${h} ⭐ Horário especial (+R$ 60,00)` : h;
-      horaSelect.appendChild(opt);
+  // Carrega grade de horários consultando agenda para cada slot
+  window.cCarregarHorariosDisponiveis = function() {
+    const data = document.getElementById('c-agenda-data').value;
+    if (!data) return;
+
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const escolhida = new Date(`${data}T12:00:00`);
+    if (escolhida < hoje) return;
+
+    const horarios = cListarHorariosDia(data);
+    const grade = document.getElementById('c-agenda-horarios');
+    const gradeWrap = document.getElementById('c-agenda-grade');
+    const loading = document.getElementById('c-agenda-loading');
+    const status = document.getElementById('c-agenda-status');
+    const wpp = document.getElementById('c-agenda-wpp');
+
+    grade.innerHTML = '';
+    gradeWrap.style.display = 'none';
+    loading.style.display = 'block';
+    status.style.display = 'none';
+    wpp.style.display = 'none';
+
+    // Consulta todos os horários do dia em paralelo
+    Promise.all(horarios.map(h =>
+      fetch(`${AGENDA_URL}?date=${data}&time=${h}&duration=60`)
+        .then(r => r.json())
+        .then(json => ({ hora: h, disponivel: json.disponivel === true }))
+        .catch(() => ({ hora: h, disponivel: true })) // em caso de erro, mostra disponível
+    )).then(resultados => {
+      loading.style.display = 'none';
+      gradeWrap.style.display = 'block';
+
+      resultados.forEach(({ hora, disponivel }) => {
+        const especial = cEhHorarioEspecial(data, hora);
+        const btn = document.createElement('button');
+        btn.className = 'hora-btn' +
+          (especial ? ' hora-especial' : '') +
+          (disponivel ? '' : ' hora-indisponivel');
+        btn.textContent = especial ? `${hora} ⭐` : hora;
+        btn.title = disponivel
+          ? (especial ? 'Horário especial (+R$ 60,00)' : 'Disponível')
+          : 'Indisponível';
+
+        if (disponivel) {
+          btn.onclick = () => cSelecionarHorario(btn, data, hora);
+        }
+        grade.appendChild(btn);
+      });
     });
+  };
 
-    cResetarVerificacao();
+  let cHoraSelecionada = '';
+
+  window.cSelecionarHorario = function(btn, data, hora) {
+    // Remove seleção anterior
+    document.querySelectorAll('.hora-btn.hora-selecionada').forEach(b => b.classList.remove('hora-selecionada'));
+    btn.classList.add('hora-selecionada');
+    cHoraSelecionada = hora;
+
+    const especial = cEhHorarioEspecial(data, hora);
+    const acrescimo = especial ? ACRESCIMO_ESPECIAL : 0;
+    const dataFormatada = new Date(`${data}T12:00:00`).toLocaleDateString('pt-BR');
+
+    const status = document.getElementById('c-agenda-status');
+    status.style.display = 'block';
+    status.style.background = 'rgba(74,222,128,0.08)';
+    status.style.border = '1px solid rgba(74,222,128,0.3)';
+    status.style.color = '#4ade80';
+    status.innerHTML = `✅ ${dataFormatada} às ${hora}${especial ? ' — <strong style="color:var(--dourado)">Horário especial (+R$ 60,00)</strong>' : ''}`;
+
+    cMontarBotaoWpp(data, hora, acrescimo);
   };
 
   window.cResetarVerificacao = function() {
@@ -577,67 +626,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('c-agenda-wpp').style.display = 'none';
   };
 
-  window.cVerificarAgenda = function() {
-    const data = document.getElementById('c-agenda-data').value;
-    const hora = document.getElementById('c-agenda-hora').value;
-    const status = document.getElementById('c-agenda-status');
-
-    if (!data || !hora) {
-      status.style.display = 'block';
-      status.style.background = 'rgba(239,68,68,0.1)';
-      status.style.border = '1px solid rgba(239,68,68,0.3)';
-      status.style.color = '#f87171';
-      status.innerHTML = '⚠️ Selecione a data e o horário primeiro.';
-      return;
-    }
-
-    const hoje = new Date(); hoje.setHours(0,0,0,0);
-    const escolhida = new Date(`${data}T12:00:00`);
-    if (escolhida < hoje) {
-      status.style.display = 'block';
-      status.style.background = 'rgba(239,68,68,0.1)';
-      status.style.border = '1px solid rgba(239,68,68,0.3)';
-      status.style.color = '#f87171';
-      status.innerHTML = '❌ Data inválida. Escolha uma data futura.';
-      return;
-    }
-
-    status.style.display = 'block';
-    status.style.background = 'rgba(201,168,76,0.08)';
-    status.style.border = '1px solid rgba(201,168,76,0.2)';
-    status.style.color = 'var(--dourado)';
-    status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando disponibilidade...';
-    document.getElementById('c-agenda-wpp').style.display = 'none';
-
-    // Passa duração de 60 min para o script verificar sobreposição correta
-    fetch(`${AGENDA_URL}?date=${data}&time=${hora}&duration=60`)
-      .then(r => r.json())
-      .then(json => {
-        const especial = cEhHorarioEspecial(data, hora);
-        const acrescimo = especial ? ACRESCIMO_ESPECIAL : 0;
-
-        if (json.disponivel) {
-          status.style.background = 'rgba(74,222,128,0.08)';
-          status.style.border = '1px solid rgba(74,222,128,0.3)';
-          status.style.color = '#4ade80';
-          const dataFormatada = new Date(`${data}T12:00:00`).toLocaleDateString('pt-BR');
-          status.innerHTML = `✅ Horário disponível! ${dataFormatada} às ${hora}${especial ? ' — <strong>Horário especial (+R$ 60,00)</strong>' : ''}`;
-          cMontarBotaoWpp(data, hora, acrescimo);
-        } else {
-          status.style.background = 'rgba(239,68,68,0.1)';
-          status.style.border = '1px solid rgba(239,68,68,0.3)';
-          status.style.color = '#f87171';
-          status.innerHTML = '❌ Horário indisponível. Por favor, escolha outro horário ou data.';
-          document.getElementById('c-agenda-wpp').style.display = 'none';
-        }
-      })
-      .catch(() => {
-        status.style.background = 'rgba(239,68,68,0.1)';
-        status.style.border = '1px solid rgba(239,68,68,0.3)';
-        status.style.color = '#f87171';
-        status.innerHTML = '⚠️ Erro ao verificar. Tente novamente ou entre em contato pelo WhatsApp.';
-      });
-  };
+  window.cVerificarAgenda = function() {}; // mantido por compatibilidade
 
   function cMontarMsgWppFoto(data, hora, acrescimo) {
     const nomeServico = cServico === 'impermeabilizacao' ? 'Impermeabilização' : `Higienização de ${cServico === 'sofa' ? 'Sofá' : 'Colchão'} (modelo não listado)`;
@@ -771,10 +760,15 @@ document.addEventListener('DOMContentLoaded', function () {
   // Abre tela de agendamento
   window.cAbrirAgenda = function() {
     const hoje = new Date().toISOString().split('T')[0];
-    document.getElementById('c-agenda-data').min = hoje;
-    document.getElementById('c-agenda-data').value = '';
-    document.getElementById('c-agenda-hora').innerHTML = '<option value="">Selecione</option>';
-    cResetarVerificacao();
+    const input = document.getElementById('c-agenda-data');
+    input.min = hoje;
+    input.value = '';
+    document.getElementById('c-agenda-grade').style.display = 'none';
+    document.getElementById('c-agenda-loading').style.display = 'none';
+    document.getElementById('c-agenda-horarios').innerHTML = '';
+    document.getElementById('c-agenda-status').style.display = 'none';
+    document.getElementById('c-agenda-wpp').style.display = 'none';
+    cHoraSelecionada = '';
     cIrPasso('c-passo-agenda');
   };
 
