@@ -546,6 +546,21 @@ document.addEventListener('DOMContentLoaded', function () {
     return false;
   }
 
+  // Gera lista de horários de 30 em 30 min entre início e fim (inclusive)
+  // O último horário possível é fim - 1h (para o serviço terminar dentro do expediente)
+  function cGerarHorarios(inicioH, inicioM, fimH, fimM) {
+    const horarios = [];
+    let h = inicioH, m = inicioM;
+    // Último horário = fim - 60min
+    const limiteTotal = (fimH * 60 + fimM) - 60;
+    while ((h * 60 + m) <= limiteTotal) {
+      horarios.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+      m += 30;
+      if (m >= 60) { h++; m = 0; }
+    }
+    return horarios;
+  }
+
   // Popula o select de horários conforme o dia escolhido
   window.cAtualizarHorarios = function() {
     const dataInput = document.getElementById('c-agenda-data');
@@ -559,14 +574,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let horarios = [];
     if (diaSemana === 0) {
-      // Domingo: 8h–14h especial
-      horarios = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00'];
+      // Domingo especial: 8h–14h → último às 13:00 (13+1h=14h)
+      horarios = cGerarHorarios(8, 0, 14, 0);
     } else if (diaSemana === 6) {
-      // Sábado: 7h–12h normal, 14h–16h especial
-      horarios = ['07:00','08:00','09:00','10:00','11:00','12:00','14:00','15:00','16:00'];
+      // Sábado normal: 7h–13h → último às 12:00 (12+1h=13h, dentro do expediente até 13h)
+      // Sábado especial: 14h–17h → último às 16:00 (16+1h=17h)
+      horarios = [...cGerarHorarios(7, 0, 13, 0), ...cGerarHorarios(14, 0, 17, 0)];
     } else {
-      // Seg–Sex: 7h–17h normal, 18h–20h especial
-      horarios = ['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'];
+      // Seg–Sex normal: 7h–18h → último às 17:00 (17+1h=18h)
+      // Seg–Sex especial: 18h–21h → último às 20:00 (20+1h=21h)
+      horarios = [...cGerarHorarios(7, 0, 18, 0), ...cGerarHorarios(18, 0, 21, 0)];
     }
 
     horarios.forEach(h => {
@@ -599,7 +616,6 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    // Bloquear datas passadas
     const hoje = new Date(); hoje.setHours(0,0,0,0);
     const escolhida = new Date(`${data}T12:00:00`);
     if (escolhida < hoje) {
@@ -618,7 +634,8 @@ document.addEventListener('DOMContentLoaded', function () {
     status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando disponibilidade...';
     document.getElementById('c-agenda-wpp').style.display = 'none';
 
-    fetch(`${AGENDA_URL}?date=${data}&time=${hora}`)
+    // Passa duração de 60 min para o script verificar sobreposição correta
+    fetch(`${AGENDA_URL}?date=${data}&time=${hora}&duration=60`)
       .then(r => r.json())
       .then(json => {
         const especial = cEhHorarioEspecial(data, hora);
