@@ -705,7 +705,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function mover() {
       if (atual > maxIndex) atual = 0;
       if (atual < 0) atual = maxIndex;
-      const cardW = track.children[0] ? track.children[0].offsetWidth + 24 : 0;
+      const cardW = 320 + 24; // largura fixa + gap
       track.style.transform = `translateX(-${atual * cardW}px)`;
       atualizarDots();
     }
