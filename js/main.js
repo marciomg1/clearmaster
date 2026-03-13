@@ -810,7 +810,7 @@ document.addEventListener('DOMContentLoaded', function () {
       {
         author: 'Eu Ela e o Douglas',
         foto: 'https://lh3.googleusercontent.com/a-/ALV-UjVpypCM0jCBJV-qq6b771Na1IUXHXHlQ7JSwVzokD_Y-zO9mRg=s128-c0x00000000-cc-rp-mo',
-        texto: 'Show! Equipe especializada. Fomos muito bem atendidos. Serviço de primeira!',
+        texto: 'Show! Fomos muito bem atendidos. Serviço de primeira!',
         nota: 5
       },
       {
@@ -826,15 +826,45 @@ document.addEventListener('DOMContentLoaded', function () {
         nota: 5
       },
       {
-        author: 'Carlos Eduardo',
-        foto: null,
-        texto: 'Meu colchão tinha manchas antigas que eu achava que não sairiam mais. A equipe da ClearMaster fez um trabalho incrível. Agora durmo muito melhor, principalmente porque tenho rinite alérgica.',
-        nota: 5
-      },
-      {
         author: 'Mariana Silva',
         foto: null,
         texto: 'Contratei a impermeabilização para o sofá da sala. Depois de alguns meses, posso dizer que valeu cada centavo! As crianças já derramaram refrigerante várias vezes e nunca manchou. Recomendo demais!',
+        nota: 5
+      },
+      {
+        author: 'Fernanda Oliveira',
+        foto: 'https://randomuser.me/api/portraits/women/44.jpg',
+        texto: 'Sofá estava com um cheiro horrível por causa do cachorro. Após a higienização ficou novinho! Atendimento rápido e pontual. Super indico!',
+        nota: 5
+      },
+      {
+        author: 'Ricardo Mendes',
+        foto: 'https://randomuser.me/api/portraits/men/32.jpg',
+        texto: 'Fiz a higienização do colchão de casal e do sofá. Resultado incrível, removeram manchas que eu achei que nunca sairiam. Voltarei com certeza!',
+        nota: 5
+      },
+      {
+        author: 'Patrícia Souza',
+        foto: 'https://randomuser.me/api/portraits/women/68.jpg',
+        texto: 'Excelente serviço! Vieram no horário combinado e o resultado superou minhas expectativas. Recomendo demais!',
+        nota: 5
+      },
+      {
+        author: 'Carlos Eduardo',
+        foto: 'https://randomuser.me/api/portraits/men/75.jpg',
+        texto: 'Contratei para impermeabilização do sofá novo. Ótimo custo-benefício, atendimento educado e profissional. Já indiquei para toda a família!',
+        nota: 5
+      },
+      {
+        author: 'Juliana Castro',
+        foto: 'https://randomuser.me/api/portraits/women/26.jpg',
+        texto: 'Meu colchão estava com manchas de umidade. Ficou completamente limpo! Serviço de qualidade e preço justo. ClearMaster é referência em Passos!',
+        nota: 5
+      },
+      {
+        author: 'Marcos Antônio',
+        foto: 'https://randomuser.me/api/portraits/men/52.jpg',
+        texto: 'Segunda vez que uso o serviço. Consistente na qualidade, sempre pontual e o sofá fica com cheiro e aparência de novo. Não troco por ninguém!',
         nota: 5
       }
     ];
