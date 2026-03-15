@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
 
+
+
   // ============ MENU MOBILE ============
   const hamburger = document.querySelector('.hamburger');
   const navMenu = document.querySelector('.nav-menu');
@@ -16,7 +18,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // ============ HEADER SCROLL ============
+
+  // ======== HEADER SCROLL ========
   const header = document.querySelector('.header');
   if (header) {
     window.addEventListener('scroll', () => {
