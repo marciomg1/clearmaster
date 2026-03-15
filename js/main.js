@@ -472,6 +472,13 @@ document.addEventListener('DOMContentLoaded', function () {
   window.cIrPasso = function(id) {
     document.querySelectorAll('#contato .calc-step').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
+    const calc = document.querySelector('.calc-destaque-wrapper');
+    if (calc) {
+      setTimeout(() => {
+        const top = calc.getBoundingClientRect().top + window.pageYOffset - 80;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }, 50);
+    }
   };
 
   window.cEscolherServico = function(servico) {
