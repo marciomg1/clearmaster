@@ -779,7 +779,7 @@ document.addEventListener('DOMContentLoaded', function () {
       ${taxaHTML}
       <p style="font-size:0.82rem;color:var(--texto-muted);margin:8px 0 0;">⚠️ Valor será confirmado após envio de foto pelo WhatsApp.</p>`;
 
-    btnAgendar.style.display = 'flex'; window.animarValorPreco('contador-preco', preco);
+    btnAgendar.style.display = 'flex';
     cIrPasso('c-passo-resultado');
   }
 
