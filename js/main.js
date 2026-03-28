@@ -420,7 +420,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     content.innerHTML = `
       <div class="calc-resultado-servico">Higienização de ${nomeServico}</div>
-      <div class="calc-resultado-preco">R$ ${preco},00</div>
+      <div class="calc-resultado-preco">R$ <span id="contador-preco">0</span>,00</div>
       <div class="calc-resultado-detalhe">${item.label}</div>
       <div class="calc-resultado-detalhe">📍 ${calcCidade}</div>
       ${calcTaxa > 0
@@ -470,6 +470,11 @@ document.addEventListener('DOMContentLoaded', function () {
   let cServico = null, cModelo = null, cCidade = '', cTaxa = 0;
 
   window.cIrPasso = function(id) {
+        // PROGRESS BAR logic
+    const pbMap = { 'c-passo-1': '25%', 'c-passo-foto': '50%', 'c-passo-2': '50%', 'c-passo-3': '75%', 'c-passo-resultado': '100%', 'c-passo-agenda': '100%' };
+    const pBar = document.getElementById('calc-progress-bar');
+    if (pBar && pbMap[id]) pBar.style.width = pbMap[id];
+    
     document.querySelectorAll('#contato .calc-step').forEach(s => s.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     const calc = document.querySelector('.calc-destaque-wrapper');
@@ -699,6 +704,20 @@ document.addEventListener('DOMContentLoaded', function () {
     window.open(`https://wa.me/5535992469549?text=${encodeURIComponent(msg)}`, '_blank');
   };
 
+  window.animarValorPreco = function(id, target) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    let start = 0;
+    const duration = 1500;
+    const interval = 16;
+    const step = Math.max(1, Math.ceil(target / (duration / interval)));
+    const timer = setInterval(() => {
+      start += step;
+      if (start >= target) { start = target; clearInterval(timer); }
+      el.textContent = start;
+    }, interval);
+};
+
   // Mostra resultado com valor e botão "Gostaria de agendar?"
   function cMostrarResultado() {
     const content = document.getElementById('c-resultado-content');
@@ -727,7 +746,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     content.innerHTML = `
       <div class="calc-resultado-servico">Higienização de ${cServico === 'sofa' ? 'Sofá' : 'Colchão'}</div>
-      <div class="calc-resultado-preco">R$ ${preco},00</div>
+      <div class="calc-resultado-preco">R$ <span id="contador-preco">0</span>,00</div>
       <div class="calc-resultado-detalhe">${item.label}</div>
       <div class="calc-resultado-detalhe">📍 ${cCidade}</div>
       ${cTaxa > 0
@@ -736,7 +755,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       <p style="font-size:0.82rem;color:var(--texto-muted);margin:8px 0 0;">⚠️ Valor estimado. Será confirmado após envio de foto do estofado pelo WhatsApp.</p>`;
 
-    btnAgendar.style.display = 'flex';
+    btnAgendar.style.display = 'flex'; window.animarValorPreco('contador-preco', preco);
     cIrPasso('c-passo-resultado');
   }
 
@@ -760,7 +779,7 @@ document.addEventListener('DOMContentLoaded', function () {
       ${taxaHTML}
       <p style="font-size:0.82rem;color:var(--texto-muted);margin:8px 0 0;">⚠️ Valor será confirmado após envio de foto pelo WhatsApp.</p>`;
 
-    btnAgendar.style.display = 'flex';
+    btnAgendar.style.display = 'flex'; window.animarValorPreco('contador-preco', preco);
     cIrPasso('c-passo-resultado');
   }
 
@@ -840,37 +859,37 @@ document.addEventListener('DOMContentLoaded', function () {
       },
       {
         author: 'Fernanda Oliveira',
-        foto: 'https://randomuser.me/api/portraits/women/44.jpg',
+        foto: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=128&h=128&fit=crop',
         texto: 'Sofá estava com um cheiro horrível por causa do cachorro. Após a higienização ficou novinho! Atendimento rápido e pontual. Super indico!',
         nota: 5
       },
       {
         author: 'Ricardo Mendes',
-        foto: 'https://randomuser.me/api/portraits/men/32.jpg',
+        foto: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=128&h=128&fit=crop',
         texto: 'Fiz a higienização do colchão de casal e do sofá. Resultado incrível, removeram manchas que eu achei que nunca sairiam. Voltarei com certeza!',
         nota: 5
       },
       {
         author: 'Patrícia Souza',
-        foto: 'https://randomuser.me/api/portraits/women/68.jpg',
+        foto: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=128&h=128&fit=crop',
         texto: 'Excelente serviço! Vieram no horário combinado e o resultado superou minhas expectativas. Recomendo demais!',
         nota: 5
       },
       {
         author: 'Carlos Eduardo',
-        foto: 'https://randomuser.me/api/portraits/men/75.jpg',
+        foto: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=128&h=128&fit=crop',
         texto: 'Contratei para impermeabilização do sofá novo. Ótimo custo-benefício, atendimento educado e profissional. Já indiquei para toda a família!',
         nota: 5
       },
       {
         author: 'Juliana Castro',
-        foto: 'https://randomuser.me/api/portraits/women/26.jpg',
+        foto: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=128&h=128&fit=crop',
         texto: 'Meu colchão estava com manchas de umidade. Ficou completamente limpo! Serviço de qualidade e preço justo. ClearMaster é referência em Passos!',
         nota: 5
       },
       {
         author: 'Marcos Antônio',
-        foto: 'https://randomuser.me/api/portraits/men/52.jpg',
+        foto: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=128&h=128&fit=crop',
         texto: 'Segunda vez que uso o serviço. Consistente na qualidade, sempre pontual e o sofá fica com cheiro e aparência de novo. Não troco por ninguém!',
         nota: 5
       }
