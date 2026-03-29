@@ -978,3 +978,17 @@ select.form-control option { background:var(--azul-medio); color:var(--texto-bra
   border-color: rgba(201,168,76,0.3) !important;
   box-shadow: 0 24px 60px rgba(0,0,0,0.6), 0 0 30px rgba(201,168,76,0.1) !important;
 }
+
+/* EFEITO 2: Respiro Magnético (Ouro Puro) */
+.glow-breath-title {
+  animation: slowBreathGlow 2s ease-in-out infinite alternate !important;
+}
+
+@keyframes slowBreathGlow {
+  0% {
+    text-shadow: 0 0 8px rgba(212, 175, 55, 0.3), 0 0 16px rgba(212, 175, 55, 0.1);
+  }
+  100% {
+    text-shadow: 0 0 24px rgba(212, 175, 55, 1), 0 0 40px rgba(212, 175, 55, 0.7), 0 0 60px rgba(212, 175, 55, 0.4);
+  }
+}
