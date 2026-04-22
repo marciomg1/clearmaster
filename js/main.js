@@ -899,16 +899,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function cardHTML(r) {
       const stars = '★'.repeat(r.nota) + '☆'.repeat(5 - r.nota);
-      const foto = r.foto
-        ? `<img src="${r.foto}" alt="${r.author}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;">`
-        : `<div class="depoimento-avatar">${r.author[0].toUpperCase()}</div>`;
       return `
         <div class="depoimento-card">
           <span class="quote-icon">"</span>
           <p class="depoimento-texto">${r.texto}</p>
           <div class="depoimento-autor">
-            ${foto}
-            <div class="depoimento-autor-info">
+            <div class="depoimento-autor-info" style="margin-left:0;">
               <h4>${r.author}</h4>
               <div class="estrelas" style="color:var(--dourado)">${stars}</div>
             </div>
